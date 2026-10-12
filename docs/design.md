@@ -1,4 +1,3 @@
-<!-- template: app/design.md v1 -->
 # Template design language
 
 Every value below mirrors `TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift`; `design/tokens.html` shows them and `design/screens/example.html` is the Example screen drawn with them. Change the three together.

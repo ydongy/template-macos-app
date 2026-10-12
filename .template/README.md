@@ -1,59 +1,16 @@
-<!-- template: app/README.md v1 -->
-# Template
+# .template
 
-Template is a macOS menu bar utility that shows one list of items with a status each, so that you can see at a glance what is fine and what needs a look, and keeps itself up to date.
+Skeletons that `scripts/init.sh` installs over the tree, chosen by `--license`. Nothing here is part of the
+template itself; `init.sh` deletes this directory.
 
-## Status
+| Directory | Installed by | Contents |
+|---|---|---|
+| `oss/` | `--license mit` (default) | Open-source `README.md`, `AGENTS.md`, `CHANGELOG.md` for the new product. `LICENSE` (MIT), `CONTRIBUTING.md`, `CLAUDE.md`, `.editorconfig`, `ci.yml`, `pr-title.yml` and Dependabot config are the files already at the template root; `CODEOWNERS` is generated from `--owner` or the git remote. |
+| `product/` | `--license proprietary` | Closed-source product skeleton: proprietary `LICENSE` (terms of service), `README.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CHANGELOG.md`/`CHANGELOG.zh.md`, `SECURITY.md`, `THIRD_PARTY.md`, `docs/` (specification, legal, roadmap, website, process, milestones, ADRs, design language), `design/README.md`, `.docs-check.json`, `.repo-type`, `.claude/`, `.codex/`, `.github/` (shared-workflow callers for CI, docs check and release, Copilot instructions). |
 
-Version 1.0.0 is in preparation: the app, the tests and the release scripts exist; the first real screen, signing, notarization and the website are the remaining work. Requires macOS 26.0 or later. See [docs/roadmap.md](docs/roadmap.md).
+How it is applied: the chosen directory is copied over the working tree first, then every file is renamed and
+rewritten (`Template` to the product name, `example.com` to the domain, and so on). In `proprietary` mode the
+open-source-only files (`CONTRIBUTING.md`, `pr-title.yml`, `CODEOWNERS`) are removed.
 
-## Product
-
-- **At a glance**: lives in the menu bar; the panel lists the items, each with a status symbol, a detail line and a date.
-- **Four states**: loading, loaded, empty and failed, each with a clear message and a way to try again.
-- **Always current**: updates arrive inside the app and are installed only after you confirm.
-- **Nine languages**: English, Chinese (simplified and traditional), Japanese, Korean, French, German, Spanish and Portuguese (Brazil).
-- **Private**: no account, no telemetry; the only network request is the update check.
-
-## Install
-
-Download the `.dmg` from [example.com](https://example.com), drag Template to Applications and open it; the website shows the SHA-256 hash of each download, which `shasum -a 256 <file>` must reproduce. Updates are installed inside the app after you confirm them.
-
-## Development
-
-Requirements: macOS 26.0 or later, Xcode 27 (the compatibility job also builds with the previous Xcode). The project is described by [XcodeGen](https://github.com/yonaskolb/XcodeGen): after changing `project.yml`, run `xcodegen generate` and commit `Template.xcodeproj`; CI fails if it is stale. The version lives in `Config/Version.xcconfig` only and is changed with `scripts/bump.sh <X.Y.Z>`.
-
-```bash
-xcodegen generate
-
-xcodebuild build -project Template.xcodeproj -scheme Template \
-  -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
-
-xcodebuild test -project Template.xcodeproj -scheme Template \
-  -destination 'platform=macOS' -testLanguage en -testRegion US CODE_SIGNING_ALLOWED=NO
-
-xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
-```
-
-How we work is the ydongy [handbook](https://github.com/ydongy/.github/tree/6b48552c969c28a954498123bb502a556f8eed79/handbook); [docs/process.md](docs/process.md) lists only what is specific to Template.
-
-## Documentation
-
-| Document | Contents |
-|---|---|
-| [docs/spec.md](docs/spec.md) | What to build |
-| [docs/design.md](docs/design.md) | Design language |
-| [docs/roadmap.md](docs/roadmap.md) | What comes after the baseline |
-| [docs/legal.md](docs/legal.md) | Legal facts and the code they must match |
-| [docs/website.md](docs/website.md) | What the app depends on from the website |
-| [docs/process.md](docs/process.md) | What differs for Template from the handbook |
-| [docs/adr/](docs/adr/README.md) | Decisions |
-| [docs/milestones/v1.0.md](docs/milestones/v1.0.md) | The 1.0 baseline |
-| [design/README.md](design/README.md) | Design mockups |
-| [CHANGELOG.md](CHANGELOG.md) | Changes |
-| [THIRD_PARTY.md](THIRD_PARTY.md) | Third-party software |
-| [AGENTS.md](AGENTS.md) | Brief for AI collaborators |
-
-## License
-
-Closed source, all rights reserved. [LICENSE](LICENSE) is the terms of service and the license agreement, with the same text as [example.com/terms](https://example.com/terms); third-party software is listed in [THIRD_PARTY.md](THIRD_PARTY.md).
+Placeholders are the same as in the rest of the template: `Template`, `templatecore`, `example.com`,
+`com.example.template`, `https://github.com/ydongy/template`. Do not write a real product name here.

@@ -462,8 +462,10 @@ publish() {
   r2_put "$OUT_DIR/appcast.xml" "appcast.xml" "application/xml" "no-cache"
   r2_put "$OUT_DIR/latest.json" "latest.json" "application/json" "no-cache"
   log "Published: $DOWNLOADS_URL/appcast.xml and latest.json"
-  log "Next: the public changelog on the website is NOT updated automatically. Review CHANGELOG.md and CHANGELOG.zh.md, then run:"
-  log "  scripts/website-changelog.py --version $VERSION --website-dir <clone of the website repo> --open-pr"
+  if [[ -f scripts/website-changelog.py ]]; then
+    log "Next: the public changelog on the website is NOT updated automatically. Review CHANGELOG.md and CHANGELOG.zh.md, then run:"
+    log "  scripts/website-changelog.py --version $VERSION --website-dir <clone of the website repo> --open-pr"
+  fi
 }
 
 # --- main ------------------------------------------------------------------

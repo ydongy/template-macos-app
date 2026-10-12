@@ -41,7 +41,7 @@ done
 if [[ -z "$(awk '!/^#/ && !/^$/ && !/^[A-Z_]+="[^"$`]*"$/' Config/release.conf)" ]]; then
   pass "Config/release.conf has only comments and plain KEY=\"value\" lines"
 else fail "Config/release.conf has only comments and plain KEY=\"value\" lines"; fi
-if grep -ilF "$DOMAIN" scripts/release.sh scripts/bump.sh scripts/release-credentials.sh scripts/scan_secrets.py scripts/website-changelog.py scripts/ax-audit.swift | grep -q .; then
+if grep -ilF "$DOMAIN" scripts/release.sh scripts/bump.sh scripts/release-credentials.sh scripts/scan_secrets.py scripts/ax-audit.swift $(ls scripts/website-changelog.py 2> /dev/null) | grep -q .; then
   fail "the domain is written in Config/release.conf only"; else pass "the domain is written in Config/release.conf only"; fi
 
 # --- argument and prerequisite errors ---
@@ -241,6 +241,7 @@ mkdir -p "$TMP/app-other/Contents"
 printf 'class ForbidTwo {}\n' > "$TMP/app-other/Contents/binary"
 expect_fail "FORBID_SYMBOLS come from the settings file" "failed the artifact scan" run_scan_app "$TMP/app-other" RELEASE_CONF="$TMP/zzfake7.conf"
 if run_scan_app "$TMP/app-other" > /dev/null 2>&1; then pass "the default FORBID_SYMBOLS do not include another product's"; else fail "the default FORBID_SYMBOLS do not include another product's"; fi
+if [[ -f scripts/website-changelog.py ]]; then
 hosts="$(python3 - <<'PY'
 import importlib.util
 spec = importlib.util.spec_from_file_location("wc", "scripts/website-changelog.py")
@@ -249,6 +250,7 @@ print(" ".join(wc.ALLOWED_HOSTS))
 PY
 )"
 [[ "$hosts" == "$DOMAIN www.$DOMAIN dl.$DOMAIN" ]] && pass "website-changelog.py allows the hosts of PRODUCT_DOMAIN" || fail "website-changelog.py hosts ($hosts)"
+fi
 
 # --- publishing to R2 (stubbed curl) ---
 cat > "$TMP/bin/curl" <<'STUB'

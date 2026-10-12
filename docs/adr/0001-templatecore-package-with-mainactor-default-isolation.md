@@ -1,9 +1,7 @@
-<!-- template: adr.md v1 -->
 # 0001 TemplateCore package with MainActor default isolation
 
 - Status: accepted
 - Date: 2026-10-03
-- Related: [handbook/types/app/layout.md](https://github.com/ydongy/.github/blob/6b48552c969c28a954498123bb502a556f8eed79/handbook/types/app/layout.md), [handbook/stacks/swift.md](https://github.com/ydongy/.github/blob/6b48552c969c28a954498123bb502a556f8eed79/handbook/stacks/swift.md)
 
 ## Context
 

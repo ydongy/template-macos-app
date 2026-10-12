@@ -1,0 +1,24 @@
+name: PR title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    name: Conventional Commits title
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate the pull request title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          regex='^(feat|fix|docs|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+          if [[ ! "$TITLE" =~ $regex ]]; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'fix(panel): keep the list sorted'. Got: $TITLE"
+            exit 1
+          fi

@@ -1,7 +1,7 @@
 <!-- template: process.md v1 -->
 # Template development process
 
-The process is the ydongy handbook (`https://github.com/ydongy/.github/tree/6b48552c969c28a954498123bb502a556f8eed79/handbook`).
+The process is the ydongy handbook (`https://github.com/ydongy/.github/tree/f61354c75725bf3688632a9d3040e5664046f81a/handbook`).
 This file lists only what is specific to Template.
 
 ## Commit scopes and labels

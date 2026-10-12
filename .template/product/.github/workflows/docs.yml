@@ -13,6 +13,6 @@ concurrency:
 
 jobs:
   docs:
-    uses: ydongy/.github/.github/workflows/docs-check.yml@6b48552c969c28a954498123bb502a556f8eed79
+    uses: ydongy/.github/.github/workflows/docs-check.yml@f61354c75725bf3688632a9d3040e5664046f81a
     with:
-      handbook-ref: 6b48552c969c28a954498123bb502a556f8eed79
+      handbook-ref: f61354c75725bf3688632a9d3040e5664046f81a

@@ -14,7 +14,7 @@ The handbook link and docs workflow pin one revision; upgrade them together in a
 - What to build: `docs/spec.md` (stable headings; link `docs/spec.md#updates`, never a section number). How it looks and moves: `docs/design.md` and `design/README.md`. Why it is built this way: `docs/adr/README.md`. Legal facts and the code that must match them: `docs/legal.md`. What the app needs from the website: `docs/website.md`. The 1.0 baseline: `docs/milestones/v1.0.md`. This repository's differences from the handbook: `docs/process.md`.
 - Docs win over code. If they disagree, fix the docs first, then the code, and say so in the PR.
 
-How we work: the ydongy handbook (`https://github.com/ydongy/.github/tree/6b48552c969c28a954498123bb502a556f8eed79/handbook`);
+How we work: the ydongy handbook (`https://github.com/ydongy/.github/tree/f61354c75725bf3688632a9d3040e5664046f81a/handbook`);
 rules for AI collaborators: `handbook/core/agents.md`.
 
 ## Directory boundaries

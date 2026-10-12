@@ -1,4 +1,3 @@
-<!-- template: adr-index.md v2 -->
 # Architecture Decision Records
 
 Each record covers one decision: context, decision, cost. A reversed decision keeps its file: write a new
@@ -10,6 +9,17 @@ record and mark the old one "superseded by NNNN".
 |---|---|---|
 | [0001](0001-templatecore-package-with-mainactor-default-isolation.md) | TemplateCore package with MainActor default isolation | accepted |
 
-## Record template
+## Record format
 
-See `handbook/templates/common/adr.md`.
+Name a record `NNNN-short-title.md` and write:
+
+```markdown
+# NNNN Title
+
+- Status: proposed | accepted | superseded by NNNN
+- Date: YYYY-MM-DD
+
+## Context
+## Decision
+## Cost
+```

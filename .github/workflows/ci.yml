@@ -1,5 +1,3 @@
-# Every PR must pass; the jobs are defined once for ydongy in
-# ydongy/.github (handbook/stacks/swift.md, "CI").
 name: CI
 
 on:
@@ -7,15 +5,67 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  XCODE_VERSION: "26.6"
 
 jobs:
-  ci:
-    uses: ydongy/.github/.github/workflows/macos-ci.yml@main
-    with:
-      project: Template.xcodeproj
-      scheme: Template
-      lint-paths: Template TemplateCore TemplateTests
-      run-compat: ${{ github.event_name == 'push' }}
+  build-test:
+    name: Format, build, test
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the secret scan reads the whole history
+
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app" && xcodebuild -version
+
+      - name: Install XcodeGen
+        run: command -v xcodegen > /dev/null || brew install xcodegen
+
+      - name: Project is up to date
+        run: |
+          xcodegen generate --quiet
+          git diff --exit-code -- '*.xcodeproj' || {
+            echo "::error::project.yml changed but the generated project was not committed; run xcodegen generate"; exit 1; }
+
+      - name: Format check
+        run: xcrun swift-format lint --strict --recursive --parallel Template TemplateCore TemplateTests
+
+      - name: Resolve packages (retried; the Sparkle binary download is occasionally refused)
+        run: |
+          for attempt in 1 2 3; do
+            xcodebuild -resolvePackageDependencies -project Template.xcodeproj -scheme Template && exit 0
+            echo "attempt $attempt failed; retrying in 20s"; sleep 20
+          done
+          exit 1
+
+      - name: Script tests
+        run: |
+          scripts/test-release.sh
+          
+      - name: Secret scan of the history
+        run: python3 scripts/scan_secrets.py
+
+      - name: Build (Release)
+        run: |
+          set -o pipefail
+          xcodebuild build -project Template.xcodeproj -scheme Template \
+            -configuration Release -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        # COMPAT_RUN=1 disables suites that need real sockets; the hosted image is unreliable for them.
+        env:
+          TEST_RUNNER_COMPAT_RUN: "1"
+        run: |
+          set -o pipefail
+          xcodebuild test -project Template.xcodeproj -scheme Template \
+            -destination 'platform=macOS' -testLanguage en -testRegion US CODE_SIGNING_ALLOWED=NO

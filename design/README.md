@@ -1,4 +1,3 @@
-<!-- template: design-README.md v1 -->
 # Design mockups
 
 ## Viewing
