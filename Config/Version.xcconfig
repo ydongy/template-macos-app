@@ -1,0 +1,5 @@
+// The only place the version is written; change it with scripts/bump.sh.
+// MARKETING_VERSION is what people see. CURRENT_PROJECT_VERSION is a monotonically increasing integer:
+// Sparkle compares it to decide whether an update is newer, so every release must raise it.
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1

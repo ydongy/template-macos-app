@@ -1,0 +1,21 @@
+# Every PR must pass; the jobs are defined once for ydongy in
+# ydongy/.github (handbook/stacks/swift.md, "CI").
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ydongy/.github/.github/workflows/macos-ci.yml@main
+    with:
+      project: Template.xcodeproj
+      scheme: Template
+      lint-paths: Template TemplateCore TemplateTests
+      run-compat: ${{ github.event_name == 'push' }}

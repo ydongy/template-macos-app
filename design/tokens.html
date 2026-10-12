@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template · Design tokens</title>
+<!--
+  Mirrors TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift, name to value. A token changes in
+  the Swift file, in docs/design.md and here together. Self-contained: no external resources.
+  Colors: the Swift palette uses system semantic colors, which change with the OS and the user's accent
+  choice. The values below are approximations of the macOS system colors for the mockups only.
+-->
+<style>
+:root {
+  --space-xxs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+
+  --radius-row: 8px;
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  --motion-standard-duration: 0.2s;
+  --motion-standard-curve: ease-in-out;
+
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --typography-title: 700 15px/20px var(--font-system);
+  --typography-row-title: 600 13px/16px var(--font-system);
+  --typography-body: 400 13px/16px var(--font-system);
+  --typography-meta: 400 11px/14px var(--font-system);
+  --typography-caption: 400 10px/13px var(--font-system);
+
+  --metrics-row-height: 44px;
+  --metrics-status-dot: 8px;
+  --metrics-empty-icon: 36px;
+  --metrics-hairline: 1px;
+
+  --panel-width: 320px;
+  --panel-min-height: 200px;
+  --panel-max-height: 420px;
+
+  /* page only */
+  --page-ink: rgb(0 0 0 / 0.85);
+  --page-ink-secondary: rgb(0 0 0 / 0.5);
+  --page-bg: #f2f3f5;
+  --page-line: rgb(0 0 0 / 0.12);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-ink: rgb(255 255 255 / 0.85);
+    --page-ink-secondary: rgb(255 255 255 / 0.55);
+    --page-bg: #1b1c1f;
+    --page-line: rgb(255 255 255 / 0.14);
+    color-scheme: dark;
+  }
+}
+
+/* Palette in both appearances; applied by data-scheme on a swatch group. */
+[data-scheme="light"] {
+  --palette-ink: rgb(0 0 0 / 0.85);
+  --palette-ink-secondary: rgb(0 0 0 / 0.5);
+  --palette-surface: #ffffff;
+  --palette-hairline: rgb(0 0 0 / 0.1);
+  --palette-accent: #007aff;
+  --palette-ok: #28cd41;
+  --palette-attention: #ff9500;
+  --palette-failure: #ff3b30;
+  --group-bg: #f6f6f6;
+}
+[data-scheme="dark"] {
+  --palette-ink: rgb(255 255 255 / 0.85);
+  --palette-ink-secondary: rgb(255 255 255 / 0.55);
+  --palette-surface: #1e1e1e;
+  --palette-hairline: rgb(255 255 255 / 0.1);
+  --palette-accent: #0a84ff;
+  --palette-ok: #32d74b;
+  --palette-attention: #ff9f0a;
+  --palette-failure: #ff453a;
+  --group-bg: #282828;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; padding: var(--space-xl); background: var(--page-bg); color: var(--page-ink); font: var(--typography-body); }
+main { max-width: 880px; margin: 0 auto; }
+h1 { font: var(--typography-title); margin: 0 0 var(--space-xs); }
+h2 { font: var(--typography-row-title); margin: var(--space-xl) 0 var(--space-sm); padding-top: var(--space-md); border-top: 1px solid var(--page-line); }
+p.note { font: var(--typography-meta); color: var(--page-ink-secondary); margin: 0 0 var(--space-md); max-width: 720px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+table { border-collapse: collapse; width: 100%; font: var(--typography-meta); }
+th, td { text-align: left; padding: var(--space-xs) var(--space-md) var(--space-xs) 0; border-bottom: 1px solid var(--page-line); vertical-align: middle; }
+th { color: var(--page-ink-secondary); font-weight: 600; }
+
+.bar { display: block; height: 12px; background: var(--page-ink-secondary); border-radius: 2px; }
+.radius-box { width: 64px; height: 40px; background: var(--page-ink-secondary); opacity: 0.35; border: 1px solid var(--page-ink-secondary); }
+.rule { display: block; background: var(--page-ink); }
+
+.groups { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-lg); }
+.group { background: var(--group-bg); color: var(--palette-ink); border-radius: var(--radius-card); padding: var(--space-md); border: 1px solid var(--page-line); }
+.group h3 { font: var(--typography-meta); color: var(--palette-ink-secondary); margin: 0 0 var(--space-sm); font-weight: 600; }
+.swatch-row { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-xs) 0; font: var(--typography-meta); }
+.swatch { width: 40px; height: 24px; border-radius: var(--radius-row); border: 1px solid var(--palette-hairline); flex: none; }
+.swatch-row .name { flex: 1 1 auto; }
+.swatch-row .value { color: var(--palette-ink-secondary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
+.sample-ink { color: var(--palette-ink); }
+.sample-secondary { color: var(--palette-ink-secondary); }
+
+.sample { color: var(--page-ink); }
+.s-title { font: var(--typography-title); }
+.s-row-title { font: var(--typography-row-title); }
+.s-body { font: var(--typography-body); }
+.s-meta { font: var(--typography-meta); }
+.s-caption { font: var(--typography-caption); }
+
+.panel-demo { position: relative; width: var(--panel-width); height: var(--panel-min-height); border: 1px dashed var(--page-ink-secondary); border-radius: var(--radius-card); font: var(--typography-meta); color: var(--page-ink-secondary); display: flex; align-items: center; justify-content: center; }
+.row-demo { width: var(--panel-width); height: var(--metrics-row-height); border: 1px solid var(--page-line); display: flex; align-items: center; gap: var(--space-md); padding: 0 var(--space-md); font: var(--typography-meta); color: var(--page-ink-secondary); }
+.dot { display: inline-block; width: var(--metrics-status-dot); height: var(--metrics-status-dot); border-radius: 50%; background: var(--page-ink-secondary); flex: none; }
+.motion-track { position: relative; width: 240px; height: 24px; border: 1px solid var(--page-line); border-radius: var(--radius-pill); }
+.motion-ball { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--page-ink-secondary); animation: slide 1.6s var(--motion-standard-curve) infinite alternate; }
+@keyframes slide { 0%, 20% { transform: translateX(0); } 80%, 100% { transform: translateX(216px); } }
+@media (prefers-reduced-motion: reduce) { .motion-ball { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Template · Design tokens</h1>
+  <p class="note">Each section lists a group of <code>DesignTokens</code> in <code>DesignTokens.swift</code>: the Swift name, the value used by the app and the CSS custom property used by the mockups. Lengths are points in the app and pixels here.</p>
+
+  <h2>Space</h2>
+  <p class="note"><code>DesignTokens.Space</code>: the spacing scale, strictly increasing.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Value</th><th>Sample</th></tr>
+    <tr><td><code>Space.xxs</code></td><td><code>--space-xxs</code></td><td>2</td><td><span class="bar" style="width: var(--space-xxs)"></span></td></tr>
+    <tr><td><code>Space.xs</code></td><td><code>--space-xs</code></td><td>4</td><td><span class="bar" style="width: var(--space-xs)"></span></td></tr>
+    <tr><td><code>Space.sm</code></td><td><code>--space-sm</code></td><td>8</td><td><span class="bar" style="width: var(--space-sm)"></span></td></tr>
+    <tr><td><code>Space.md</code></td><td><code>--space-md</code></td><td>12</td><td><span class="bar" style="width: var(--space-md)"></span></td></tr>
+    <tr><td><code>Space.lg</code></td><td><code>--space-lg</code></td><td>16</td><td><span class="bar" style="width: var(--space-lg)"></span></td></tr>
+    <tr><td><code>Space.xl</code></td><td><code>--space-xl</code></td><td>24</td><td><span class="bar" style="width: var(--space-xl)"></span></td></tr>
+  </table>
+
+  <h2>Radius</h2>
+  <p class="note"><code>DesignTokens.Radius</code>. The pill radius is larger than any box, so it always yields a capsule.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Value</th><th>Sample</th></tr>
+    <tr><td><code>Radius.row</code></td><td><code>--radius-row</code></td><td>8</td><td><div class="radius-box" style="border-radius: var(--radius-row)"></div></td></tr>
+    <tr><td><code>Radius.card</code></td><td><code>--radius-card</code></td><td>10</td><td><div class="radius-box" style="border-radius: var(--radius-card)"></div></td></tr>
+    <tr><td><code>Radius.pill</code></td><td><code>--radius-pill</code></td><td>999</td><td><div class="radius-box" style="border-radius: var(--radius-pill)"></div></td></tr>
+  </table>
+
+  <h2>Typography</h2>
+  <p class="note"><code>DesignTokens.Typography</code>: semantic system fonts, so Dynamic Type and the user's settings keep working. Sizes are the macOS defaults of each text style.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Style, size, weight</th><th>Sample</th></tr>
+    <tr><td><code>Typography.title</code></td><td><code>--typography-title</code></td><td>title3 bold, 15</td><td class="sample s-title">Example</td></tr>
+    <tr><td><code>Typography.rowTitle</code></td><td><code>--typography-row-title</code></td><td>body semibold, 13</td><td class="sample s-row-title">Alpha</td></tr>
+    <tr><td><code>Typography.body</code></td><td><code>--typography-body</code></td><td>body regular, 13</td><td class="sample s-body">Everything is in order</td></tr>
+    <tr><td><code>Typography.meta</code></td><td><code>--typography-meta</code></td><td>subheadline regular, 11</td><td class="sample s-meta">3 items</td></tr>
+    <tr><td><code>Typography.caption</code></td><td><code>--typography-caption</code></td><td>caption regular, 10</td><td class="sample s-caption">Sep 21</td></tr>
+  </table>
+
+  <h2>Palette</h2>
+  <p class="note"><code>DesignTokens.Palette</code> uses system semantic colors (<code>.primary</code>, <code>.secondary</code>, <code>controlBackgroundColor</code>, <code>separatorColor</code>, <code>.accentColor</code>, <code>.green</code>, <code>.orange</code>, <code>.red</code>); light and dark come from the system appearance and there are no per-mode overrides in code. The swatches are approximations of the macOS system colors for the mockups: the real values change with the OS version, the accent color and accessibility settings such as Increase Contrast.</p>
+  <div class="groups">
+    <div class="group" data-scheme="light">
+      <h3>Light</h3>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ink)"></span><span class="name">Palette.ink</span><span class="value">rgb(0 0 0 / 0.85)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ink-secondary)"></span><span class="name">Palette.inkSecondary</span><span class="value">rgb(0 0 0 / 0.5)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-surface)"></span><span class="name">Palette.surface</span><span class="value">#ffffff</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-hairline)"></span><span class="name">Palette.hairline</span><span class="value">rgb(0 0 0 / 0.1)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-accent)"></span><span class="name">Palette.accent</span><span class="value">#007aff</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ok)"></span><span class="name">Palette.ok</span><span class="value">#28cd41</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-attention)"></span><span class="name">Palette.attention</span><span class="value">#ff9500</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-failure)"></span><span class="name">Palette.failure</span><span class="value">#ff3b30</span></div>
+    </div>
+    <div class="group" data-scheme="dark">
+      <h3>Dark</h3>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ink)"></span><span class="name">Palette.ink</span><span class="value">rgb(255 255 255 / 0.85)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ink-secondary)"></span><span class="name">Palette.inkSecondary</span><span class="value">rgb(255 255 255 / 0.55)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-surface)"></span><span class="name">Palette.surface</span><span class="value">#1e1e1e</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-hairline)"></span><span class="name">Palette.hairline</span><span class="value">rgb(255 255 255 / 0.1)</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-accent)"></span><span class="name">Palette.accent</span><span class="value">#0a84ff</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-ok)"></span><span class="name">Palette.ok</span><span class="value">#32d74b</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-attention)"></span><span class="name">Palette.attention</span><span class="value">#ff9f0a</span></div>
+      <div class="swatch-row"><span class="swatch" style="background: var(--palette-failure)"></span><span class="name">Palette.failure</span><span class="value">#ff453a</span></div>
+    </div>
+  </div>
+  <p class="note" style="margin-top: var(--space-md)">The status symbol takes <code>Palette.ok</code> for <code>checkmark.circle.fill</code> and <code>Palette.attention</code> for <code>exclamationmark.triangle.fill</code>; status is also carried by the shape. <code>Palette.surface</code>, <code>Palette.hairline</code> and <code>Palette.accent</code> are declared for screens that need them; the Example screen uses the system divider and the link button style.</p>
+
+  <h2>Metrics</h2>
+  <p class="note"><code>DesignTokens.Metrics</code>.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Value</th><th>Sample</th></tr>
+    <tr><td><code>Metrics.rowHeight</code></td><td><code>--metrics-row-height</code></td><td>44</td><td><div class="row-demo">minimum row height</div></td></tr>
+    <tr><td><code>Metrics.statusDot</code></td><td><code>--metrics-status-dot</code></td><td>8</td><td><span class="dot"></span></td></tr>
+    <tr><td><code>Metrics.emptyIcon</code></td><td><code>--metrics-empty-icon</code></td><td>36</td><td><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" fill="none" stroke="currentColor" stroke-dasharray="3 3" style="color: var(--page-ink-secondary)"/></svg></td></tr>
+    <tr><td><code>Metrics.hairline</code></td><td><code>--metrics-hairline</code></td><td>1</td><td><span class="rule" style="width: 96px; height: var(--metrics-hairline)"></span></td></tr>
+  </table>
+
+  <h2>Panel metrics</h2>
+  <p class="note"><code>DesignTokens.PanelMetrics</code>: the menu bar panel that hosts the sample screen. The height of the content area is clamped between the minimum and the maximum; the dashed box shows the minimum.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Value</th></tr>
+    <tr><td><code>PanelMetrics.width</code></td><td><code>--panel-width</code></td><td>320</td></tr>
+    <tr><td><code>PanelMetrics.minHeight</code></td><td><code>--panel-min-height</code></td><td>200</td></tr>
+    <tr><td><code>PanelMetrics.maxHeight</code></td><td><code>--panel-max-height</code></td><td>420</td></tr>
+  </table>
+  <div class="panel-demo" style="margin-top: var(--space-md)">320 × 200 (minimum content area; maximum 420)</div>
+
+  <h2>Motion</h2>
+  <p class="note"><code>DesignTokens.Motion.standard</code>: <code>.easeInOut(duration: 0.2)</code>, used for the change between the states of the panel. The sample below runs slower so the curve is visible; it stops when Reduce Motion is on.</p>
+  <table>
+    <tr><th>Swift</th><th>CSS</th><th>Value</th></tr>
+    <tr><td><code>Motion.standard</code></td><td><code>--motion-standard-duration</code>, <code>--motion-standard-curve</code></td><td>0.2 s, ease in and out</td></tr>
+  </table>
+  <div class="motion-track" style="margin-top: var(--space-md)"><span class="motion-ball"></span></div>
+</main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# A tag vX.Y.Z builds, signs, notarizes and publishes the release (handbook/types/app/release.md).
+# Secrets live in ydongy's `release` environment; settings in Config/release.conf.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    uses: ydongy/.github/.github/workflows/macos-release.yml@main
+    with:
+      project: Template.xcodeproj
+      scheme: Template
+      sparkle-account: template
+    secrets: inherit

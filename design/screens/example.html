@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template · Example screen</title>
+<!--
+  The Example screen of the menu bar panel, as Template/UI/Example/ExampleView.swift renders it.
+  No query: overview of every state in light and dark.
+  ?state=loading|loaded|empty|failed  one panel at its real size.
+  ?scheme=light|dark                  force the color scheme (otherwise prefers-color-scheme decides).
+  The custom properties in :root carry the names and numbers of
+  TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift. Colors are approximations of the macOS
+  system colors. Custom properties named --mockup-* only dress the page and are not tokens.
+-->
+<style>
+/* ---- Design tokens (mirror DesignTokens.swift) ------------------------------------------------ */
+:root {
+  --space-xxs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+
+  --radius-row: 8px;
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  --motion-standard-duration: 0.2s;
+  --motion-standard-curve: ease-in-out;
+
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --typography-title: 700 15px/20px var(--font-system);
+  --typography-row-title: 600 13px/16px var(--font-system);
+  --typography-body: 400 13px/16px var(--font-system);
+  --typography-meta: 400 11px/14px var(--font-system);
+  --typography-caption: 400 10px/13px var(--font-system);
+
+  --metrics-row-height: 44px;
+  --metrics-status-dot: 8px;
+  --metrics-empty-icon: 36px;
+  --metrics-hairline: 1px;
+
+  --panel-width: 320px;
+  --panel-min-height: 200px;
+  --panel-max-height: 420px;
+}
+
+/* ---- Palette: light is the default; dark by attribute or by the system ---------------------------- */
+:root,
+[data-scheme="light"] {
+  color-scheme: light;
+  --palette-ink: rgb(0 0 0 / 0.85);
+  --palette-ink-secondary: rgb(0 0 0 / 0.5);
+  --palette-surface: #ffffff;
+  --palette-hairline: rgb(0 0 0 / 0.1);
+  --palette-accent: #007aff;
+  --palette-ok: #28cd41;
+  --palette-attention: #ff9500;
+  --palette-failure: #ff3b30;
+  --mockup-page-bg: #e4e6ea;
+  --mockup-panel-bg: rgb(246 246 246 / 0.97);
+  --mockup-knockout: #f6f6f6;
+  --mockup-control-bg: #ffffff;
+  --mockup-control-border: rgb(0 0 0 / 0.18);
+  --mockup-shadow: 0 10px 30px rgb(0 0 0 / 0.22), 0 0 0 0.5px rgb(0 0 0 / 0.18);
+}
+[data-scheme="dark"] {
+  color-scheme: dark;
+  --palette-ink: rgb(255 255 255 / 0.85);
+  --palette-ink-secondary: rgb(255 255 255 / 0.55);
+  --palette-surface: #1e1e1e;
+  --palette-hairline: rgb(255 255 255 / 0.1);
+  --palette-accent: #0a84ff;
+  --palette-ok: #32d74b;
+  --palette-attention: #ff9f0a;
+  --palette-failure: #ff453a;
+  --mockup-page-bg: #121316;
+  --mockup-panel-bg: rgb(40 40 40 / 0.97);
+  --mockup-knockout: #282828;
+  --mockup-control-bg: rgb(255 255 255 / 0.12);
+  --mockup-control-border: rgb(255 255 255 / 0.15);
+  --mockup-shadow: 0 10px 30px rgb(0 0 0 / 0.6), 0 0 0 0.5px rgb(255 255 255 / 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-scheme]) {
+    color-scheme: dark;
+    --palette-ink: rgb(255 255 255 / 0.85);
+    --palette-ink-secondary: rgb(255 255 255 / 0.55);
+    --palette-surface: #1e1e1e;
+    --palette-hairline: rgb(255 255 255 / 0.1);
+    --palette-accent: #0a84ff;
+    --palette-ok: #32d74b;
+    --palette-attention: #ff9f0a;
+    --palette-failure: #ff453a;
+    --mockup-page-bg: #121316;
+    --mockup-panel-bg: rgb(40 40 40 / 0.97);
+    --mockup-knockout: #282828;
+    --mockup-control-bg: rgb(255 255 255 / 0.12);
+    --mockup-control-border: rgb(255 255 255 / 0.15);
+    --mockup-shadow: 0 10px 30px rgb(0 0 0 / 0.6), 0 0 0 0.5px rgb(255 255 255 / 0.18);
+  }
+}
+
+/* ---- Page ---------------------------------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html { background: var(--mockup-page-bg); }
+body {
+  margin: 0;
+  padding: var(--space-xl);
+  font: var(--typography-body);
+  color: var(--palette-ink);
+  background: var(--mockup-page-bg);
+  min-height: 100vh;
+}
+body.single { display: flex; justify-content: center; align-items: flex-start; padding-top: 48px; }
+
+.overview h1 { font: var(--typography-title); margin: 0 0 var(--space-xs); }
+.overview .note { font: var(--typography-meta); color: var(--palette-ink-secondary); margin: 0 0 var(--space-xl); max-width: 720px; }
+.grid { display: grid; grid-template-columns: repeat(2, max-content); gap: var(--space-xl) 0; width: max-content; }
+.grid .colhead { font: var(--typography-meta); color: var(--palette-ink-secondary); padding: 0 var(--space-xl) var(--space-sm); }
+.cell { padding: var(--space-xl); background: var(--mockup-page-bg); color: var(--palette-ink); }
+.cell .label { font: var(--typography-meta); color: var(--palette-ink-secondary); margin: 0 0 var(--space-sm); }
+.cell .label code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ---- Panel (ExampleView inside MenuBarContent) ---------------------------------------------------- */
+.panel {
+  width: var(--panel-width);
+  background: var(--mockup-panel-bg);
+  border-radius: var(--radius-card);
+  box-shadow: var(--mockup-shadow);
+  color: var(--palette-ink);
+  font: var(--typography-body);
+  overflow: hidden;
+}
+.divider { height: var(--metrics-hairline); margin: 0; border: 0; background: var(--palette-hairline); }
+.spacer { flex: 1 1 auto; }
+
+.header { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); }
+.title { font: var(--typography-title); color: var(--palette-ink); margin: 0; }
+.count { font: var(--typography-meta); color: var(--palette-ink-secondary); }
+
+button { font: var(--typography-body); color: var(--palette-ink); cursor: default; }
+.btn {
+  appearance: none;
+  background: var(--mockup-control-bg);
+  border: 0.5px solid var(--mockup-control-border);
+  border-radius: 6px;
+  padding: 2px 10px;
+  box-shadow: 0 0.5px 1px rgb(0 0 0 / 0.12);
+}
+.btn:active { filter: brightness(0.92); }
+.link { appearance: none; background: none; border: 0; padding: 0; color: var(--palette-accent); }
+.link:hover { text-decoration: underline; }
+button:focus-visible { outline: 2px solid var(--palette-accent); outline-offset: 2px; }
+
+.content {
+  min-height: var(--panel-min-height);
+  max-height: var(--panel-max-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.content.fade > * { animation: fade var(--motion-standard-duration) var(--motion-standard-curve); }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.list { align-self: stretch; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.row-wrap { display: block; }
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--metrics-row-height);
+  padding: 0 var(--space-md);
+}
+.row .symbol { width: 16px; height: 16px; flex: none; }
+.row .symbol.ok { color: var(--palette-ok); }
+.row .symbol.attention { color: var(--palette-attention); }
+.row .text { display: flex; flex-direction: column; gap: var(--space-xxs); min-width: 0; }
+.row .row-title { font: var(--typography-row-title); color: var(--palette-ink); }
+.row .row-detail { font: var(--typography-meta); color: var(--palette-ink-secondary); }
+.row .date { font: var(--typography-caption); color: var(--palette-ink-secondary); margin-left: auto; padding-left: var(--space-sm); white-space: nowrap; }
+.row-wrap .divider { margin-left: var(--space-md); }
+
+.message { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-xl); text-align: center; }
+.message svg { width: var(--metrics-empty-icon); height: var(--metrics-empty-icon); color: var(--palette-ink-secondary); }
+.message .m-title { font: var(--typography-row-title); color: var(--palette-ink); }
+.message .m-detail { font: var(--typography-meta); color: var(--palette-ink-secondary); }
+.failed-stack { display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
+
+.progress { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); }
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--palette-hairline);
+  border-top-color: var(--palette-ink-secondary);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress .p-label { font: var(--typography-meta); color: var(--palette-ink-secondary); }
+
+.footer { display: flex; align-items: center; padding: var(--space-md); }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+  .content.fade > * { animation: none; }
+}
+</style>
+</head>
+<body>
+<noscript><p>This mockup draws the panel with a few lines of script; enable JavaScript to see it.</p></noscript>
+<script>
+"use strict";
+
+// Sample data: MockExampleSource.sampleItems (dates shown as .dateTime.month(.abbreviated).day()).
+const ITEMS = [
+  { id: "alpha", title: "Alpha", detail: "Everything is in order", status: "ok", date: "Sep 21" },
+  { id: "beta", title: "Beta", detail: "Needs a look", status: "attention", date: "Sep 22" },
+  { id: "gamma", title: "Gamma", detail: "Everything is in order", status: "ok", date: "Sep 23" },
+];
+const STATES = ["loading", "loaded", "empty", "failed"];
+const SVG = "http://www.w3.org/2000/svg";
+
+function el(tag, cls, text, attrs) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined && text !== null) node.textContent = text;
+  for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+  return node;
+}
+
+function svg(viewBox, inner, label) {
+  const node = document.createElementNS(SVG, "svg");
+  node.setAttribute("viewBox", viewBox);
+  node.setAttribute("fill", "none");
+  if (label) { node.setAttribute("role", "img"); node.setAttribute("aria-label", label); }
+  else node.setAttribute("aria-hidden", "true");
+  node.innerHTML = inner;
+  return node;
+}
+
+// checkmark.circle.fill and exclamationmark.triangle.fill (approximations of the SF Symbols).
+function statusSymbol(status) {
+  const knock = "var(--mockup-knockout)";
+  if (status === "ok") {
+    const node = svg("0 0 16 16",
+      '<circle cx="8" cy="8" r="7.5" fill="currentColor"/>' +
+      '<path d="m4.7 8.3 2.3 2.4 4.4-5" stroke="' + knock + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+      "OK");
+    node.setAttribute("class", "symbol ok");
+    return node;
+  }
+  const node = svg("0 0 16 16",
+    '<path d="m8 1.4c.4 0 .8.2 1 .6l6.2 11c.4.7-.1 1.6-1 1.6h-12.4c-.9 0-1.4-.9-1-1.6l6.2-11c.2-.4.6-.6 1-.6z" fill="currentColor"/>' +
+    '<path d="m8 6v3.6" stroke="' + knock + '" stroke-width="1.6" stroke-linecap="round"/>' +
+    '<circle cx="8" cy="11.9" r=".95" fill="' + knock + '"/>',
+    "Needs attention");
+  node.setAttribute("class", "symbol attention");
+  return node;
+}
+
+// tray and exclamationmark.triangle (outlined), 36 pt in the app.
+const TRAY = '<path d="m3.5 13.5 2.7-8.3a1.5 1.5 0 0 1 1.4-1h8.8a1.5 1.5 0 0 1 1.4 1l2.7 8.3v4.8a1.8 1.8 0 0 1-1.8 1.8h-13.4a1.8 1.8 0 0 1-1.8-1.8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>' +
+  '<path d="m3.5 13.5h4.6a3.9 3.9 0 0 0 7.8 0h4.6" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+const WARN = '<path d="m12 3.6c.4 0 .8.2 1 .6l8 14c.4.7-.1 1.6-.9 1.6h-16.2c-.8 0-1.3-.9-.9-1.6l8-14c.2-.4.6-.6 1-.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>' +
+  '<path d="m12 9.6v4.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+  '<circle cx="12" cy="16.9" r="1" fill="currentColor"/>';
+
+function message(icon, title, detail, id) {
+  const box = el("div", "message", null, { "data-id": id, role: "group", "aria-label": title + ". " + detail });
+  box.append(svg("0 0 24 24", icon), el("div", "m-title", title), el("div", "m-detail", detail));
+  return box;
+}
+
+function row(item) {
+  const wrap = el("li", "row-wrap");
+  const r = el("div", "row", null, { "data-id": "example.row." + item.id });
+  const text = el("div", "text");
+  text.append(el("div", "row-title", item.title), el("div", "row-detail", item.detail));
+  r.append(statusSymbol(item.status), text, el("div", "date", item.date));
+  wrap.append(r, el("hr", "divider"));
+  return wrap;
+}
+
+function contentFor(state) {
+  switch (state) {
+    case "loading": {
+      const p = el("div", "progress", null, { "data-id": "example.progress", role: "progressbar", "aria-label": "Loading…" });
+      p.append(el("div", "spinner"), el("div", "p-label", "Loading…"));
+      return p;
+    }
+    case "empty":
+      return message(TRAY, "Nothing here yet", "Items you add appear in this list.", "example.empty");
+    case "failed": {
+      const stack = el("div", "failed-stack");
+      const retry = el("button", "btn", "Try Again", { type: "button", "data-id": "example.retry" });
+      stack.append(
+        message(WARN, "Could not load the items", "Check that the data file is valid, then try again.", "example.failed"),
+        retry);
+      return stack;
+    }
+    default: {
+      const list = el("ul", "list", null, { "data-id": "example.list" });
+      ITEMS.forEach(item => list.append(row(item)));
+      return list;
+    }
+  }
+}
+
+function render(panel, state, animate) {
+  panel.dataset.state = state;
+  const count = panel.querySelector(".count");
+  count.textContent = state === "loaded" ? ITEMS.length + " items" : "";
+  count.hidden = state !== "loaded";
+  const content = panel.querySelector(".content");
+  content.classList.toggle("fade", !!animate);
+  content.replaceChildren(contentFor(state));
+  if (animate) { void content.offsetWidth; }
+}
+
+// Refresh and Try Again load again: loading for a moment, then the state this panel was built with.
+function reload(panel) {
+  const target = panel.dataset.target;
+  if (panel.dataset.state === "loading") return;
+  render(panel, "loading", true);
+  setTimeout(() => render(panel, target === "loading" ? "loaded" : target, true), 900);
+}
+
+function buildPanel(state) {
+  const panel = el("div", "panel", null, { "data-state": state, "data-target": state });
+  const header = el("header", "header");
+  const refresh = el("button", "btn", "Refresh", { type: "button", "data-id": "example.refresh" });
+  header.append(el("h1", "title", "Example", { "data-id": "example.title" }), el("span", "count", "", { "data-id": "example.count" }), el("span", "spacer"), refresh);
+  const footer = el("footer", "footer");
+  footer.append(
+    el("button", "link", "Check for Updates…", { type: "button", "data-id": "menubar.check-updates" }),
+    el("span", "spacer"),
+    el("button", "link", "Quit", { type: "button", "data-id": "menubar.quit" }));
+  panel.append(header, el("hr", "divider"), el("section", "content"), el("hr", "divider"), footer);
+  panel.addEventListener("click", event => {
+    const id = event.target.closest("button")?.dataset.id;
+    if (id === "example.refresh" || id === "example.retry") reload(panel);
+  });
+  render(panel, state, false);
+  return panel;
+}
+
+const params = new URLSearchParams(location.search);
+const state = params.get("state");
+const scheme = params.get("scheme");
+
+if (STATES.includes(state)) {
+  if (scheme === "light" || scheme === "dark") document.documentElement.dataset.scheme = scheme;
+  document.body.classList.add("single");
+  document.body.append(buildPanel(state));
+} else {
+  document.body.classList.add("overview");
+  const intro = el("div");
+  intro.append(
+    el("h1", null, "Template · Example screen"),
+    el("p", "note", "Every state in light and dark. Open this file with ?state=loading|loaded|empty|failed for one panel at its real size, and add ?scheme=light|dark to force the color scheme; without it the page follows the system appearance."));
+  const grid = el("div", "grid");
+  grid.append(el("div", "colhead", "Light"), el("div", "colhead", "Dark"));
+  for (const s of STATES) {
+    for (const mode of ["light", "dark"]) {
+      const cell = el("div", "cell", null, { "data-scheme": mode });
+      const label = el("p", "label");
+      label.append(el("code", null, "?state=" + s + "&scheme=" + mode));
+      cell.append(label, buildPanel(s));
+      grid.append(cell);
+    }
+  }
+  document.body.append(intro, grid);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+Terms of Service (template: app/LICENSE v1)
+
+Copyright (c) 2026 ydongy. All rights reserved.
+
+Last updated October 2026
+
+<!-- Product slots: "Your data and credentials" says what the product touches on the user's behalf. "Free plan
+     and Pro", "License key" and "Activation and verification" describe the plans and the licensing service;
+     rewrite them together with the code when the product adds paid plans (docs/legal.md lists the facts and
+     the code that must match). -->
+
+1. License
+   These Terms of Service are also the license agreement for Template. You are granted a non-exclusive,
+   non-transferable license to install and use official releases of Template on Macs that you own or
+   control. The software is licensed, not sold.
+
+2. Free plan and Pro
+   Template is free to use and the free plan includes every feature of the current release. If a paid Pro
+   plan is offered, its features and price are shown on the website before you buy, and a Pro license covers
+   every 1.x version.
+
+3. License key
+   A license key, where one is issued, is for the purchaser only and is active on a limited number of your
+   own Macs at a time, stated at purchase. Do not transfer, rent, lend, share or resell it. To use it on
+   another Mac, deactivate it on one of the others first.
+
+4. Activation and verification
+   The current release does not contact a licensing service. If a release adds license activation, it sends
+   only the license key and a device label to Dodo Payments, and these terms say how often and how long Pro
+   keeps working offline before that release ships.
+
+5. Your data and credentials
+   Template shows a list of items that it reads from a file in its own folder on your Mac
+   (~/Library/Application Support). It does not read other files of yours, does not send the items anywhere
+   and does not ask for any account or credential. If a future release stores a credential, it is kept in
+   your Mac's keychain only.
+
+6. Restrictions
+   Without prior written permission of the copyright holder you may not: copy, modify, reverse engineer,
+   decompile or disassemble the software (except where law expressly allows); redistribute, rent, lend,
+   sublicense or sell it; bypass or tamper with license verification, where there is any; or remove copyright
+   notices.
+
+7. Updates
+   Template checks for new versions once a day, and when you ask, by reading an update feed from
+   dl.example.com. The request carries the app name and version, the update framework's version and, as with
+   every web request, your IP address; no system profile is sent. A new version is installed only after you
+   confirm, and Template installs it only if its signature is valid.
+
+8. Third-party components
+   Template includes Sparkle for updates. It is licensed separately (MIT License), not under this agreement.
+   The list is in THIRD_PARTY.md.
+
+9. Purchases and refunds
+   Purchases are processed by Dodo Payments as the merchant of record, which calculates taxes for your
+   region; Dodo's own terms apply to the payment. Refunds are covered by the Refund Policy
+   (https://example.com/refund). This does not affect rights that the law gives you as a consumer.
+
+10. Intellectual property
+    The Template name, icon and software, and their copyright, belong to ydongy. Copyright (c) 2026
+    ydongy. All rights reserved.
+
+11. Termination
+    If you breach these terms, your license ends automatically. If a license key stops working, for example
+    after a refund, Template goes back to the free plan.
+
+12. Disclaimer
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+
+13. Limitation of liability
+    To the maximum extent permitted by law, the copyright holder is not liable for any indirect, incidental
+    or consequential damages arising from use of the software, and the total liability is limited to the
+    amount you paid for the license.
+
+14. Changes
+    These terms may be updated; the date above shows the latest version. If you keep using Template after an
+    update, you accept it.
+
+Contact: support@example.com

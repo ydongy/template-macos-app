@@ -1,0 +1,3 @@
+# Codex CLI settings for this repository. Instructions live in AGENTS.md.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"

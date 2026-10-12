@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,subprocess,sys; p=json.load(sys.stdin).get('tool_input',{}).get('file_path',''); p.endswith('.swift') and subprocess.run(['xcrun','swift-format','format','-i',p])\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(xcodegen generate)",
+      "Bash(xcodebuild build:*)",
+      "Bash(xcodebuild test:*)",
+      "Bash(xcrun swift-format:*)",
+      "Bash(scripts/test-release.sh:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(python3 scripts/scan_secrets.py:*)",
+      "Bash(python3 scripts/test_website_changelog.py:*)"
+    ]
+  }
+}

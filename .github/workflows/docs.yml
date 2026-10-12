@@ -1,0 +1,18 @@
+# Documents must match the ydongy templates (handbook/core/docs.md).
+name: Docs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    uses: ydongy/.github/.github/workflows/docs-check.yml@6b48552c969c28a954498123bb502a556f8eed79
+    with:
+      handbook-ref: 6b48552c969c28a954498123bb502a556f8eed79

@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+# The app pins Sparkle: commit its resolved version for reproducible builds.
+!Template.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# Archives & exports
+*.xcarchive
+*.dmg
+*.ipa
+
+# Editors
+.vscode/
+.idea/
+
+# Local-only
+.lody/
+*.local.*
+
+# Python
+__pycache__/

@@ -1,0 +1,93 @@
+name: Template
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+
+# Version numbers live in Config/Version.xcconfig only (scripts/bump.sh edits it).
+configFiles:
+  Debug: Config/Version.xcconfig
+  Release: Config/Version.xcconfig
+
+packages:
+  TemplateCore:
+    path: TemplateCore
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+
+targets:
+  Template:
+    type: application
+    platform: macOS
+    # Synced folders: new files join the target without regenerating the project.
+    sources:
+      - path: Template
+        type: syncedFolder
+    dependencies:
+      - package: TemplateCore
+      - package: Sparkle
+        product: Sparkle
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.template
+        PRODUCT_NAME: Template
+        # Info.plist: Xcode generates the common keys; Config/Template-Info.plist adds the Sparkle keys,
+        # which read the two build settings below.
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Config/Template-Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Template
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 ydongy"
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: NO
+        COMBINE_HIDPI_IMAGES: YES
+        # Update feed. scripts/release.sh overrides it with DOWNLOADS_URL from Config/release.conf.
+        SPARKLE_FEED_URL: https://dl.example.com/appcast.xml
+        # Public EdDSA key from Sparkle's generate_keys. While empty, the updater is disabled and
+        # scripts/release.sh --publish refuses to publish.
+        SPARKLE_PUBLIC_KEY: ""
+
+  TemplateTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: TemplateTests
+        type: syncedFolder
+    dependencies:
+      - target: Template
+      - package: TemplateCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.template.tests
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Template:
+    build:
+      targets:
+        Template: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - name: TemplateTests
+          parallelizable: true
+    archive:
+      config: Release
