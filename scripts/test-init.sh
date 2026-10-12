@@ -46,10 +46,10 @@ new_copy() {
 }
 
 # Assertions shared by both licenses (run inside the initialised copy).
-common_assertions() {
+common_assertions() { # common_assertions <owner> <license>
   for path in Probe/App/ProbeApp.swift Probe/UI/Example/ExampleView.swift Probe/Resources/Localizable.xcstrings \
     ProbeCore/Package.swift ProbeCore/Sources/ProbeCore/Design/DesignTokens.swift ProbeTests/LocalizationCatalogTests.swift \
-    Probe.xcodeproj/project.pbxproj Config/Probe-Info.plist README.md AGENTS.md CLAUDE.md LICENSE CHANGELOG.md THIRD_PARTY.md \
+    Probe.xcodeproj/project.pbxproj Config/Probe-Info.plist README.md README.zh-CN.md AGENTS.md CLAUDE.md LICENSE CHANGELOG.md THIRD_PARTY.md \
     docs/design.md docs/adr/README.md design/screens/example.html .github/workflows/ci.yml .github/dependabot.yml \
     CONTRIBUTING.md .github/CODEOWNERS .github/workflows/pr-title.yml .editorconfig; do
     [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
@@ -79,9 +79,35 @@ common_assertions() {
   for path in .${DC}.json .repo-type GEMINI.md SECURITY.md .github/copilot-instructions.md .github/workflows/docs.yml docs/pro""cess.md docs/${MS}s; do
     [[ ! -e "$path" ]] && pass "absent: $path" || fail "absent: $path"
   done
+  readme_assertions "$1" "$2"
   [[ "$(cat CLAUDE.md)" == "@AGENTS.md" ]] && pass "CLAUDE.md is @AGENTS.md" || fail "CLAUDE.md is @AGENTS.md"
   if grep -rqE --exclude-dir=.git "uses: ydongy/" .github; then fail "workflows are self-contained"; else pass "workflows are self-contained"; fi
   grep -q "XCODE_MAJOR" .github/workflows/ci.yml && pass "ci.yml selects Xcode by major version" || fail "ci.yml selects Xcode by major version"
+}
+
+# readme_assertions <owner> <license>: both READMEs are the generated product's, in the right language, linked to each other.
+readme_assertions() {
+  head -3 README.md | grep -qx '# Probe' && pass "README.md is the product's" || fail "README.md is the product's"
+  head -3 README.zh-CN.md | grep -qx '# Probe' && pass "README.zh-CN.md is the product's" || fail "README.zh-CN.md is the product's"
+  grep -qF '[简体中文](README.zh-CN.md)' README.md && grep -qF '[English](README.md)' README.zh-CN.md \
+    && pass "READMEs link to each other" || fail "READMEs link to each other"
+  grep -q '## Features' README.md && grep -q '## 功能特性' README.zh-CN.md && pass "READMEs have their sections" || fail "READMEs have their sections"
+  grep -v '简体中文' README.md | grep -qE '[一-龥]' && fail "README.md is English only" || pass "README.md is English only"
+  if [[ "$2" == proprietary ]]; then
+    grep -q 'license-proprietary' README.md && grep -q 'license-proprietary' README.zh-CN.md \
+      && ! grep -q 'actions/workflows/ci.yml/badge' README.md README.zh-CN.md && pass "proprietary badges, no CI badge" || fail "proprietary badges, no CI badge"
+  else
+    grep -q "actions/workflows/ci.yml/badge" README.md && grep -q "actions/workflows/ci.yml/badge" README.zh-CN.md \
+      && grep -q "github.com/$1/probe/" README.md && grep -q "github.com/$1/probe/" README.zh-CN.md \
+      && pass "MIT README badges use owner/repo" || fail "MIT README badges use owner/repo"
+  fi
+  local link target
+  for f in README.md README.zh-CN.md; do
+    while IFS= read -r link; do
+      target="${link%%#*}"; [[ -z "$target" || "$target" == http* ]] && continue
+      [[ -e "$target" ]] || fail "$f: link target exists: $target"
+    done < <(grep -oE '\]\([^)]+\)' "$f" | sed -E 's/^\]\(//; s/\)$//')
+  done
 }
 
 # build_checks <dir>: the result is a working product.
@@ -124,7 +150,7 @@ echo "== --license mit (default), full build"
 COPY="$TMP/mit"; new_copy "$COPY" "https://github.com/acme-inc/probe.git"; cd "$COPY"
 if scripts/init.sh "$NAME" "$DOMAIN" > "$TMP/init.log" 2>&1; then pass "init.sh succeeds"; else fail "init.sh succeeds"; cat "$TMP/init.log"; fi
 grep -q "^warning:" "$TMP/init.log" && { fail "init.sh reports no leftovers"; grep "^warning:" "$TMP/init.log"; } || pass "init.sh reports no leftovers"
-common_assertions acme-inc
+common_assertions acme-inc mit
 head -1 LICENSE | grep -q "^MIT License" && pass "LICENSE is MIT" || fail "LICENSE is MIT"
 [[ "$(cat .github/CODEOWNERS)" == "* @acme-inc" ]] && pass "CODEOWNERS uses the owner from the remote" || fail "CODEOWNERS uses the owner from the remote"
 for path in CHANGELOG.zh.md .github/workflows/release.yml docs/spec.md docs/legal.md docs/roadmap.md docs/website.md \
@@ -151,7 +177,7 @@ echo "== --license proprietary"
 COPY="$TMP/proprietary"; new_copy "$COPY" "https://github.com/ydongy/probe.git"; cd "$COPY"
 if scripts/init.sh --license proprietary "$NAME" "$DOMAIN" > "$TMP/init4.log" 2>&1; then pass "init.sh succeeds"; else fail "init.sh succeeds"; cat "$TMP/init4.log"; fi
 grep -q "^warning:" "$TMP/init4.log" && { fail "init.sh reports no leftovers"; grep "^warning:" "$TMP/init4.log"; } || pass "init.sh reports no leftovers"
-common_assertions ydongy
+common_assertions ydongy proprietary
 head -1 LICENSE | grep -q "^Terms of Service" && pass "LICENSE is the proprietary terms" || fail "LICENSE is the proprietary terms"
 grep -q "All rights reserved" LICENSE && pass "LICENSE reserves all rights" || fail "LICENSE reserves all rights"
 [[ "$(cat .github/CODEOWNERS)" == "* @ydongy" ]] && pass "CODEOWNERS is generated" || fail "CODEOWNERS is generated"

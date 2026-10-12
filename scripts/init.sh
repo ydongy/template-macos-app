@@ -9,7 +9,7 @@
 #   <domain>  the product domain, lowercase. The bundle id becomes com.<domain-reversed>.app (the tests
 #             get .tests), the website https://<domain>, the downloads https://dl.<domain>,
 #             support@<domain>. Example: acme.com
-#   --license mit (default): an open-source project (MIT LICENSE, README, CONTRIBUTING, AGENTS.md, CHANGELOG,
+#   --license mit (default): an open-source project (MIT LICENSE, README.md and README.zh-CN.md, CONTRIBUTING, AGENTS.md, CHANGELOG,
 #             self-contained CI, PR-title check, Dependabot, CODEOWNERS).
 #             proprietary: the same open-source standard plus the closed-source layer: terms of service as
 #             LICENSE, specification, design, legal, website, releasing, roadmap and security-review documents,
@@ -193,7 +193,7 @@ cat <<EOF
 EOF
 else
 cat <<EOF
-  1. Check LICENSE (copyright holder) and .github/CODEOWNERS; replace the Example screen and README text.
+  1. Check LICENSE (copyright holder) and .github/CODEOWNERS; replace the Example screen and the README.md / README.zh-CN.md text.
   2. Sparkle: generate_keys --account $LOWER, put the public key in SPARKLE_PUBLIC_KEY (project.yml),
      then xcodegen generate.
   3. Review "git status" and commit the list of files you checked (no blind staging).
