@@ -4,7 +4,7 @@
     python3 scripts/scan_secrets.py                 # every added line in every commit of every ref
     python3 scripts/scan_secrets.py --path build/release/Template.app --forbid "$HOME"   # a built app
 
-Matches are never printed in full: only commit, file, line and a redacted prefix, so the report itself
+Matches are never printed in full: only commit, file, line and a redacted length and fingerprint, so the report itself
 cannot leak a secret. Exit status 1 when anything is found. This is a pattern scan, not a proof that
 no secret exists: a clean result is not a statement that the project is secure.
 
@@ -14,6 +14,7 @@ The product name and the Sparkle public key come from Config/release.conf, proje
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 import os
 import re
@@ -91,7 +92,8 @@ def entropy(text: str) -> float:
 
 
 def redact(value: str) -> str:
-    return value[:4] + "…(" + str(len(value)) + " chars)"
+    """Length and a short SHA-256 fingerprint only: no character of the value is ever shown."""
+    return f"<redacted {len(value)} chars, sha256:{hashlib.sha256(value.encode()).hexdigest()[:8]}>"
 
 
 def scan_line(line: str) -> list[tuple[str, str]]:
