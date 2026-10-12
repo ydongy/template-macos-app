@@ -125,9 +125,10 @@ if [[ -n "$pubkey" ]]; then
 fi
 
 if grep -q "cloudflare-token" <<< "$scan_out" && grep -q "forbidden string '/Users/someone'" <<< "$scan_out" \
-  && ! grep -q "$fake_token" <<< "$scan_out"; then
-  pass "the scan flags tokens and forbidden strings and never prints the value"
-else fail "the scan flags tokens and forbidden strings and never prints the value ($scan_out)"; fi
+  && ! grep -q "$fake_token" <<< "$scan_out" && ! grep -qF "${fake_token:0:4}" <<< "$scan_out" \
+  && grep -Eq "<redacted [0-9]+ chars, sha256:[0-9a-f]{8}>" <<< "$scan_out"; then
+  pass "the scan flags tokens and forbidden strings and never prints any of the value"
+else fail "the scan flags tokens and forbidden strings and never prints any of the value ($scan_out)"; fi
 
 run_scan_app() { # run_scan_app <app dir> [extra env...]; scan_app on a fake bundle
   local app="$1"; shift
