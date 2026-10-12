@@ -1,4 +1,3 @@
-<!-- template: spec.md v2 -->
 # Template specification
 
 In one sentence: **a menu bar utility that shows one list of items with a status each, and keeps itself up to date.** The list is the sample screen `Example`; a product replaces its contents and keeps the structure.
@@ -12,9 +11,9 @@ UI strings are quoted in English (the String Catalog keys); the other eight lang
 | **Menu bar only** (`LSUIElement`, `MenuBarExtra` in window style), no Dock icon and no main window | The product is glanced at and dismissed; a window would add a surface to maintain | This document |
 | Everything that is not UI lives in the TemplateCore package, with MainActor default isolation and `nonisolated` domain values | Core builds and tests without the UI; services are main-actor, values are readable anywhere | [0001](adr/0001-templatecore-package-with-mainactor-default-isolation.md) |
 | **No App Sandbox**, Hardened Runtime on, Developer ID signing and notarization, distributed from the website | The sandbox forbids the file and process access a utility of this kind grows into; Hardened Runtime and notarization keep the app trustworthy | This document |
-| macOS 26.0 and later, Swift 6 language mode | One system version to test; strict concurrency from the first line | [handbook/types/app/code.md](https://github.com/ydongy/.github/blob/f61354c75725bf3688632a9d3040e5664046f81a/handbook/types/app/code.md), [handbook/stacks/swift.md](https://github.com/ydongy/.github/blob/f61354c75725bf3688632a9d3040e5664046f81a/handbook/stacks/swift.md) |
+| macOS 26.0 and later, Swift 6 language mode | One system version to test; strict concurrency from the first line | This document |
 | Sparkle 2 for updates, in the app target only | Core stays free of third-party code | [0001](adr/0001-templatecore-package-with-mainactor-default-isolation.md) |
-| Nine UI languages, English as the only reference; the app follows the system language and `AppLanguage` is ready for a chooser | Every user reads the product in their own language | [handbook/guides/localization.md](https://github.com/ydongy/.github/blob/f61354c75725bf3688632a9d3040e5664046f81a/handbook/guides/localization.md) |
+| Nine UI languages, English as the only reference; the app follows the system language and `AppLanguage` is ready for a chooser | Every user reads the product in their own language | This document |
 | Mock and preview types exist in DEBUG builds only | Release builds contain none of them; `FORBID_SYMBOLS` in `Config/release.conf` makes the release script check it | [0001](adr/0001-templatecore-package-with-mainactor-default-isolation.md) |
 
 **Not in the baseline**: a Settings window, an About screen, a main window, notifications, login item, paid plans, any network access besides the update check.

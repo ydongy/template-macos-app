@@ -5,9 +5,6 @@
 #
 #   scripts/test-init.sh [--keep] [--full]
 #
-#   CHECK_DOCS=<path to check-docs.py>  checks the proprietary copy's documents; default:
-#                                       ../.github/scripts/check-docs.py next to this repository, skipped
-#                                       when absent
 #   --keep  do not delete the copies (their path is printed)
 #   --full  build and test the proprietary copy as well (slower)
 set -uo pipefail
@@ -15,10 +12,10 @@ cd "$(dirname "$0")/.."
 SRC="$PWD"
 
 NAME=Probe DOMAIN=probe.test
-# Words that must not survive in an open-source project (spelled in parts so that this file passes its own check).
+# Words that must not survive in any generated project (spelled in parts so that this file passes its own check).
 DC="docs-""check" HB="hand""book" MS="mile""stone" GH="ydongy/\\.""github"
-OR="ORG_DOCS""_ROOT"
-BANNED="$HB|$DC|$OR|$GH|$MS"
+OR="ORG_DOCS""_ROOT" TM="template"": "
+BANNED="$HB|$DC|$OR|$GH|$TM"
 KEEP=0 FULL=0
 for arg in "$@"; do
   case "$arg" in
@@ -53,7 +50,8 @@ common_assertions() {
   for path in Probe/App/ProbeApp.swift Probe/UI/Example/ExampleView.swift Probe/Resources/Localizable.xcstrings \
     ProbeCore/Package.swift ProbeCore/Sources/ProbeCore/Design/DesignTokens.swift ProbeTests/LocalizationCatalogTests.swift \
     Probe.xcodeproj/project.pbxproj Config/Probe-Info.plist README.md AGENTS.md CLAUDE.md LICENSE CHANGELOG.md THIRD_PARTY.md \
-    docs/design.md docs/adr/README.md design/screens/example.html .github/workflows/ci.yml .github/dependabot.yml; do
+    docs/design.md docs/adr/README.md design/screens/example.html .github/workflows/ci.yml .github/dependabot.yml \
+    CONTRIBUTING.md .github/CODEOWNERS .github/workflows/pr-title.yml .editorconfig; do
     [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
   done
   for path in Template TemplateCore TemplateTests Template.xcodeproj .template scripts/init.sh scripts/test-init.sh; do
@@ -72,9 +70,18 @@ common_assertions() {
   # The record-template heading in docs/adr/README.md is literally "## Template" and stays.
   local stale
   stale="$(grep -rIn --exclude-dir=.git --exclude-dir=build --exclude-dir=DerivedData -e Template -e example.com . \
-    | grep -v -e '^./Probe.xcodeproj' -e ':## Template$' -e 'template: ' || true)"
+    | grep -v -e '^./Probe.xcodeproj' -e ':## Template$' || true)"
   if [[ -z "$stale" ]]; then pass "no file mentions Template or example.com"; else fail "no file mentions Template or example.com"; echo "$stale" | head; fi
   if grep -rIiE --exclude-dir=.git -e 'template-macos-app' . | grep -q .; then fail "no mention of the template repository"; else pass "no mention of the template repository"; fi
+  if grep -rIniE --exclude-dir=.git --exclude-dir=build --exclude-dir=DerivedData -e "$BANNED" . | grep -q .; then
+    fail "no process-system word survives"; grep -rIniE --exclude-dir=.git --exclude-dir=build --exclude-dir=DerivedData -e "$BANNED" . | head
+  else pass "no process-system word survives"; fi
+  for path in .${DC}.json .repo-type GEMINI.md SECURITY.md .github/copilot-instructions.md .github/workflows/docs.yml docs/pro""cess.md docs/${MS}s; do
+    [[ ! -e "$path" ]] && pass "absent: $path" || fail "absent: $path"
+  done
+  [[ "$(cat CLAUDE.md)" == "@AGENTS.md" ]] && pass "CLAUDE.md is @AGENTS.md" || fail "CLAUDE.md is @AGENTS.md"
+  if grep -rqE --exclude-dir=.git "uses: ydongy/" .github; then fail "workflows are self-contained"; else pass "workflows are self-contained"; fi
+  grep -q "XCODE_MAJOR" .github/workflows/ci.yml && pass "ci.yml selects Xcode by major version" || fail "ci.yml selects Xcode by major version"
 }
 
 # build_checks <dir>: the result is a working product.
@@ -120,20 +127,12 @@ grep -q "^warning:" "$TMP/init.log" && { fail "init.sh reports no leftovers"; gr
 common_assertions acme-inc
 head -1 LICENSE | grep -q "^MIT License" && pass "LICENSE is MIT" || fail "LICENSE is MIT"
 [[ "$(cat .github/CODEOWNERS)" == "* @acme-inc" ]] && pass "CODEOWNERS uses the owner from the remote" || fail "CODEOWNERS uses the owner from the remote"
-for path in CONTRIBUTING.md .github/CODEOWNERS .github/workflows/pr-title.yml; do
-  [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
-done
-for path in .${DC}.json .repo-type GEMINI.md SECURITY.md CHANGELOG.zh.md .github/copilot-instructions.md .github/workflows/docs.yml \
-  .github/workflows/release.yml docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/process.md docs/${MS}s .claude .codex \
-  scripts/website-changelog.py scripts/test_website_changelog.py; do
+for path in CHANGELOG.zh.md .github/workflows/release.yml docs/spec.md docs/legal.md docs/roadmap.md docs/website.md \
+  docs/releasing.md docs/security .claude .codex scripts/website-changelog.py scripts/test_website_changelog.py; do
   [[ ! -e "$path" ]] && pass "absent: $path" || fail "absent: $path"
 done
-[[ "$(cat CLAUDE.md)" == "@AGENTS.md" ]] && pass "CLAUDE.md is @AGENTS.md" || fail "CLAUDE.md is @AGENTS.md"
 grep -q "project: Probe.xcodeproj\|Probe.xcodeproj" .github/workflows/ci.yml && grep -q "Probe ProbeCore ProbeTests" .github/workflows/ci.yml \
   && pass "ci.yml names the product" || fail "ci.yml names the product"
-if grep -rIn --exclude-dir=.git -E "$BANNED" . | grep -q .; then
-  fail "no banned process word"; grep -rIn --exclude-dir=.git -E "$BANNED" . | head
-else pass "no banned process word"; fi
 build_checks
 
 # ---------------- --license mit without a remote: CODEOWNERS placeholder, explicit --owner ----------------
@@ -149,26 +148,23 @@ scripts/init.sh --no-generate --license mit --owner octo "$NAME" "$DOMAIN" > "$T
 
 # ---------------- --license proprietary ----------------
 echo "== --license proprietary"
-COPY="$TMP/proprietary"; new_copy "$COPY"; cd "$COPY"
+COPY="$TMP/proprietary"; new_copy "$COPY" "https://github.com/ydongy/probe.git"; cd "$COPY"
 if scripts/init.sh --license proprietary "$NAME" "$DOMAIN" > "$TMP/init4.log" 2>&1; then pass "init.sh succeeds"; else fail "init.sh succeeds"; cat "$TMP/init4.log"; fi
 grep -q "^warning:" "$TMP/init4.log" && { fail "init.sh reports no leftovers"; grep "^warning:" "$TMP/init4.log"; } || pass "init.sh reports no leftovers"
 common_assertions ydongy
 head -1 LICENSE | grep -q "^Terms of Service" && pass "LICENSE is the proprietary terms" || fail "LICENSE is the proprietary terms"
-[[ "$(cat .repo-type)" == "app" ]] && pass ".repo-type is app" || fail ".repo-type is app"
-for path in docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/process.md docs/${MS}s/v1.0.md .${DC}.json \
-  .github/workflows/docs.yml .github/workflows/release.yml GEMINI.md SECURITY.md CHANGELOG.zh.md .github/copilot-instructions.md .claude/settings.json .codex/config.toml; do
+grep -q "All rights reserved" LICENSE && pass "LICENSE reserves all rights" || fail "LICENSE reserves all rights"
+[[ "$(cat .github/CODEOWNERS)" == "* @ydongy" ]] && pass "CODEOWNERS is generated" || fail "CODEOWNERS is generated"
+for path in docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/releasing.md docs/security/README.md CHANGELOG.zh.md \
+  .github/workflows/release.yml .claude/settings.json .codex/config.toml scripts/website-changelog.py scripts/test_website_changelog.py; do
   [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
 done
-for path in CONTRIBUTING.md .github/CODEOWNERS .github/workflows/pr-title.yml; do
-  [[ ! -e "$path" ]] && pass "absent: $path" || fail "absent: $path"
-done
-for path in scripts/website-changelog.py scripts/test_website_changelog.py; do
-  [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
-done
-grep -q "sparkle-account: probe" .github/workflows/release.yml && grep -q "project: Probe.xcodeproj" .github/workflows/ci.yml \
-  && grep -q "lint-paths: Probe ProbeCore ProbeTests" .github/workflows/ci.yml && pass "workflows name the product" || fail "workflows name the product"
-grep -q "uses: ydongy/.*/${DC}.yml" .github/workflows/docs.yml && pass "docs.yml calls the shared docs check" || fail "docs.yml calls the shared docs check"
-grep -q '"pending": \[\]' .${DC}.json && pass ".${DC}.json is written" || fail ".${DC}.json"
+grep -q "^## \[Unreleased\]" CHANGELOG.md && grep -q "^## \[Unreleased\]" CHANGELOG.zh.md && pass "both changelogs have [Unreleased]" || fail "both changelogs have [Unreleased]"
+grep -q "Probe.xcodeproj" .github/workflows/ci.yml && grep -q "Probe ProbeCore ProbeTests" .github/workflows/ci.yml \
+  && grep -q "Config/Version.xcconfig" .github/workflows/ci.yml && grep -q "workflow_dispatch" .github/workflows/ci.yml \
+  && pass "ci.yml names the product and gates the macOS job" || fail "ci.yml names the product and gates the macOS job"
+grep -q "environment: release" .github/workflows/release.yml && grep -q "scripts/release.sh" .github/workflows/release.yml \
+  && pass "release.yml is self-contained" || fail "release.yml is self-contained"
 if [[ $FULL -eq 1 ]]; then
   build_checks
 else
@@ -176,11 +172,4 @@ else
   check "xcodegen output is stable" bash -c 'xcodegen generate --quiet && git diff --exit-code -- "*.xcodeproj"'
   check "swift-format lint --strict" xcrun swift-format lint --strict --recursive Probe ProbeCore ProbeTests
 fi
-CHECK_DOCS="${CHECK_DOCS:-$SRC/../.github/scripts/check-docs.py}"
-if [[ -f "$CHECK_DOCS" ]]; then
-  check "docs check as type app" python3 "$CHECK_DOCS" "$COPY"
-else
-  echo "skip docs check (no check-docs.py; set CHECK_DOCS)"
-fi
-
 exit $FAILED

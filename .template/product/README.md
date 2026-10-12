@@ -1,4 +1,3 @@
-<!-- template: app/README.md v1 -->
 # Template
 
 Template is a macOS menu bar utility that shows one list of items with a status each, so that you can see at a glance what is fine and what needs a look, and keeps itself up to date.
@@ -21,7 +20,7 @@ Download the `.dmg` from [example.com](https://example.com), drag Template to Ap
 
 ## Development
 
-Requirements: macOS 26.0 or later, Xcode 27 (the compatibility job also builds with the previous Xcode). The project is described by [XcodeGen](https://github.com/yonaskolb/XcodeGen): after changing `project.yml`, run `xcodegen generate` and commit `Template.xcodeproj`; CI fails if it is stale. The version lives in `Config/Version.xcconfig` only and is changed with `scripts/bump.sh <X.Y.Z>`.
+Requirements: macOS 26.0 or later, Xcode 27. The project is described by [XcodeGen](https://github.com/yonaskolb/XcodeGen): after changing `project.yml`, run `xcodegen generate` and commit `Template.xcodeproj`; CI fails if it is stale. The version lives in `Config/Version.xcconfig` only and is changed with `scripts/bump.sh <X.Y.Z>`.
 
 ```bash
 xcodegen generate
@@ -35,7 +34,7 @@ xcodebuild test -project Template.xcodeproj -scheme Template \
 xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
 ```
 
-How we work is the ydongy [handbook](https://github.com/ydongy/.github/tree/f61354c75725bf3688632a9d3040e5664046f81a/handbook); [docs/process.md](docs/process.md) lists only what is specific to Template.
+Contribution rules (commit scopes, branches, changelog, releasing) are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Documentation
 
@@ -43,12 +42,13 @@ How we work is the ydongy [handbook](https://github.com/ydongy/.github/tree/f613
 |---|---|
 | [docs/spec.md](docs/spec.md) | What to build |
 | [docs/design.md](docs/design.md) | Design language |
-| [docs/roadmap.md](docs/roadmap.md) | What comes after the baseline |
+| [docs/roadmap.md](docs/roadmap.md) | What comes next |
 | [docs/legal.md](docs/legal.md) | Legal facts and the code they must match |
 | [docs/website.md](docs/website.md) | What the app depends on from the website |
-| [docs/process.md](docs/process.md) | What differs for Template from the handbook |
+| [docs/releasing.md](docs/releasing.md) | How a release is made |
+| [docs/security/](docs/security/README.md) | One security review per version |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Commits, branches, changelog |
 | [docs/adr/](docs/adr/README.md) | Decisions |
-| [docs/milestones/v1.0.md](docs/milestones/v1.0.md) | The 1.0 baseline |
 | [design/README.md](design/README.md) | Design mockups |
 | [CHANGELOG.md](CHANGELOG.md) | Changes |
 | [THIRD_PARTY.md](THIRD_PARTY.md) | Third-party software |

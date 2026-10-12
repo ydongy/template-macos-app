@@ -1,16 +1,248 @@
-# A tag vX.Y.Z builds, signs, notarizes and publishes the release (handbook/types/app/release.md).
-# Secrets live in ydongy's `release` environment; settings in Config/release.conf.
+# Release: merging a version bump to main publishes Template (docs/releasing.md, "Releasing"). Nobody pushes a tag:
+# this workflow creates it, on the commit it built, after the release is published.
+#
+#   verify   (Linux, free)  script syntax, tests of the changelog tooling, the changelog has the version
+#   release  (macOS)        tests of the release scripts, signs, notarizes and publishes to R2
+#   finish   (Linux)        the annotated tag vX.Y.Z on the built commit and the GitHub Release from the changelog
+#
+# It starts when Config/Version.xcconfig changes on main, and only `scripts/bump.sh` changes that file: the merge
+# of the version bump IS the decision to publish. By hand (Actions > Release > Run workflow) it is a rehearsal: it
+# builds, signs and notarizes the ref you pick and uploads nothing. `publish` works only on main.
+#
+# Needs a GitHub environment named `release` (Settings > Environments) with a deployment branch policy that allows
+# only `main`, and these secrets in it (values are never printed and live in a temporary keychain that is deleted
+# when the job ends):
+#   DEVELOPER_ID_P12_BASE64, DEVELOPER_ID_P12_PASSWORD     Developer ID Application certificate
+#   NOTARY_KEY_P8_BASE64, NOTARY_KEY_ID, NOTARY_ISSUER_ID  App Store Connect API key for notarytool
+#   SPARKLE_PRIVATE_KEY                                    EdDSA key exported with generate_keys -x
+#   R2_ENDPOINT, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY   the downloads bucket, write access to it only
 name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths:
+      - Config/Version.xcconfig
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish (only on main). Off = rehearsal, nothing is uploaded.
+        type: boolean
+        default: false
+
+# One release at a time, and never cancel one that has started: a half-published release is worse than a slow one.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  XCODE_MAJOR: "27" # releases are built with this Xcode, never another
 
 jobs:
+  verify:
+    name: Pre-flight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      publish: ${{ steps.mode.outputs.publish }}
+      version: ${{ steps.mode.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Publish or rehearse
+        id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.publish }}
+        run: |
+          publish=false
+          if [ "$EVENT" = push ]; then publish=true; fi
+          if [ "$EVENT" = workflow_dispatch ] && [ "$REQUESTED" = true ]; then
+            [ "$GITHUB_REF" = refs/heads/main ] || { echo "::error::publish works only on main; pick main as the ref, or leave publish off for a rehearsal"; exit 1; }
+            publish=true
+          fi
+          version="$(awk -F' = ' '/^MARKETING_VERSION =/ { print $2 }' Config/Version.xcconfig)"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "### Release $version: $([ "$publish" = true ] && echo 'will publish' || echo 'rehearsal, nothing is uploaded')" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Tests of the tooling
+        run: |
+          for f in scripts/*.sh; do bash -n "$f"; done
+          python3 scripts/test_website_changelog.py
+
+      - name: The changelog has the version
+        env:
+          PUBLISH: ${{ steps.mode.outputs.publish }}
+          VERSION: ${{ steps.mode.outputs.version }}
+        run: |
+          [ "$PUBLISH" = true ] || exit 0
+          for f in CHANGELOG.md CHANGELOG.zh.md; do
+            grep -qE "^## \[$VERSION\] - [0-9]{4}-[0-9]{2}-[0-9]{2}" "$f" \
+              || { echo "::error::$f has no section '## [$VERSION] - YYYY-MM-DD': run scripts/bump.sh $VERSION"; exit 1; }
+          done
+
   release:
-    uses: ydongy/.github/.github/workflows/macos-release.yml@main
-    with:
-      project: Template.xcodeproj
-      scheme: Template
-      sparkle-account: template
-    secrets: inherit
+    name: Build, sign, notarize
+    needs: verify
+    runs-on: macos-26
+    # The environment holds the secrets and lets only `main` use them, so a workflow of another branch never sees them.
+    environment: release
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      # A build with another Xcode is a different binary, linked against another SDK, so a release is never made
+      # with it. Nothing is signed or published before this step has passed.
+      - name: Select Xcode ${{ env.XCODE_MAJOR }}
+        run: |
+          app="$(ls -d "/Applications/Xcode_${XCODE_MAJOR}"*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -z "$app" ]; then
+            newest="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1 | sed 's/.*Xcode_//; s/\.app//')"
+            echo "::error::this runner image has no Xcode ${XCODE_MAJOR} (the newest is $newest). Releases are built with Xcode ${XCODE_MAJOR}: make this one by hand with scripts/release.sh until the hosted image has it."
+            exit 1
+          fi
+          sudo xcode-select -s "$app"
+          xcodebuild -version
+
+      - name: Tests of the release scripts
+        run: scripts/test-release.sh
+
+      - name: Temporary keychain with the signing certificate
+        env:
+          P12: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/release.keychain-db"; password="$(uuidgen)"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$keychain"
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          rm -f "$RUNNER_TEMP/cert.p12"
+          echo "KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -1)"
+          [ -n "$identity" ] || { echo "::error::no Developer ID Application identity in the certificate"; exit 1; }
+          echo "SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+
+      - name: Notarization profile
+        env:
+          KEY: ${{ secrets.NOTARY_KEY_P8_BASE64 }}
+          KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          ISSUER: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          echo "$KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          xcrun notarytool store-credentials release-notary --key "$RUNNER_TEMP/AuthKey.p8" --key-id "$KEY_ID" --issuer "$ISSUER"
+          rm -f "$RUNNER_TEMP/AuthKey.p8"
+          echo "NOTARY_PROFILE=release-notary" >> "$GITHUB_ENV"
+
+      - name: Resolve packages and import the Sparkle key
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          account="$(source Config/release.conf && printf '%s' "$SPARKLE_ACCOUNT")"
+          project="$(source Config/release.conf && printf '%s' "$PROJECT")"
+          scheme="$(source Config/release.conf && printf '%s' "$SCHEME")"
+          for _ in 1 2 3; do
+            xcodebuild -resolvePackageDependencies -project "$project" -scheme "$scheme" && break
+            sleep 20
+          done
+          bin="$(find ~/Library/Developer/Xcode/DerivedData -type d -path '*artifacts/sparkle/Sparkle/bin' | head -1)"
+          [ -n "$bin" ] || { echo "::error::Sparkle tools not found after resolving packages"; exit 1; }
+          echo "$SPARKLE_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle.key"
+          "$bin/generate_keys" --account "$account" -f "$RUNNER_TEMP/sparkle.key"
+          rm -f "$RUNNER_TEMP/sparkle.key"
+          echo "SPARKLE_BIN=$bin" >> "$GITHUB_ENV"
+
+      # `env -u` keeps a variable of the runner from replacing a value of Config/release.conf (release.sh lets the
+      # environment win). The R2 secrets are exposed to these two steps only.
+      - name: Dry run
+        env:
+          PUBLISH: ${{ needs.verify.outputs.publish }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "$PUBLISH" = true ]; then flag=--publish; else flag=; fi
+          env -u SITE_URL -u DOWNLOADS_URL scripts/release.sh --check $flag
+
+      - name: Build, sign, notarize (and publish)
+        env:
+          PUBLISH: ${{ needs.verify.outputs.publish }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          if [ "$PUBLISH" = true ]; then flag=--publish; else flag=; fi
+          env -u SITE_URL -u DOWNLOADS_URL scripts/release.sh $flag
+
+      - name: The files of this run
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-files
+          path: |
+            build/release/*.dmg
+            build/release/*.sha256
+            build/release/appcast.xml
+            build/release/latest.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Delete the temporary keychain
+        if: ${{ always() }}
+        run: '[ -z "${KEYCHAIN:-}" ] || security delete-keychain "$KEYCHAIN" || true'
+
+  finish:
+    name: Tag and GitHub Release
+    needs: [verify, release]
+    if: ${{ needs.verify.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      # Created here, with the workflow's token, on the commit that was built: a release that failed has no tag.
+      # A tag made with GITHUB_TOKEN starts no other workflow, which is why nothing listens for tags.
+      - name: Tag the built commit
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          git fetch --tags --force --quiet
+          if git rev-parse --verify --quiet "refs/tags/$tag" > /dev/null; then
+            [ "$(git rev-parse "refs/tags/$tag^{commit}")" = "$GITHUB_SHA" ] || { echo "::error::the tag $tag exists and points at another commit"; exit 1; }
+            echo "The tag $tag is already on $GITHUB_SHA."
+          else
+            git config user.name "release[bot]"
+            git config user.email "release@users.noreply.github.com"
+            git tag -a "$tag" -m "$(source Config/release.conf && printf '%s' "$APP_NAME") $VERSION" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          fi
+
+      # The installer is distributed from the website; the GitHub Release is the notes (the changelog section).
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "The release $tag already exists; leaving it as it is."
+          else
+            app="$(source Config/release.conf && printf '%s' "$APP_NAME")"
+            awk -v v="$VERSION" '/^## \[/ { on = index($0, "## [" v "]") == 1; next } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+            gh release create "$tag" --verify-tag --title "$app $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+          fi

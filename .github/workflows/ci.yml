@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  XCODE_VERSION: "26.6"
+  XCODE_MAJOR: "27" # preferred Xcode (README); the newest hosted Xcode is used when the image has none
 
 jobs:
   build-test:
@@ -25,8 +25,16 @@ jobs:
         with:
           fetch-depth: 0 # the secret scan reads the whole history
 
-      - name: Select Xcode
-        run: sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app" && xcodebuild -version
+      - name: Select Xcode ${{ env.XCODE_MAJOR }}
+        run: |
+          app="$(ls -d "/Applications/Xcode_${XCODE_MAJOR}"*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -z "$app" ]; then
+            # The template itself also builds with the newest hosted Xcode; products made from it pin their Xcode strictly.
+            app="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+            echo "::warning::this runner image has no Xcode ${XCODE_MAJOR}; building with $(basename "$app" .app) instead."
+          fi
+          sudo xcode-select -s "$app"
+          xcodebuild -version
 
       - name: Install XcodeGen
         run: command -v xcodegen > /dev/null || brew install xcodegen
@@ -51,7 +59,7 @@ jobs:
       - name: Script tests
         run: |
           scripts/test-release.sh
-          
+
       - name: Secret scan of the history
         run: python3 scripts/scan_secrets.py
 

@@ -4,7 +4,7 @@ Thanks for helping. Open an issue before a large change so we can agree on the d
 
 ## Development setup
 
-Requirements: macOS 26.0 or later, Xcode 26.6 or later, [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+Requirements: macOS 26.0 or later, Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 (`brew install xcodegen`).
 
 ```bash
