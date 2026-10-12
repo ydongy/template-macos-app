@@ -1,4 +1,3 @@
-<!-- template: website.md v1 -->
 # Website
 
 The website is a separate repository, deployed as Cloudflare Workers static assets in nine languages. This file lists what the app depends on; the app links to the pages in the visitor's language (`ProductLinks`), and every page has exactly one address.

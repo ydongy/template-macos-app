@@ -1,4 +1,3 @@
-<!-- template: legal.md v1 -->
 # Legal pages: one source per fact
 
 ## Where each thing lives
@@ -10,7 +9,7 @@
 | Refund policy | `https://example.com/refund` |
 | Support address | `support@example.com`, the same in `LICENSE`, `SECURITY.md` and the website footer |
 
-The app only links to the website pages (`ProductLinks`); it does not embed or duplicate them. The legal pages of the other eight languages open with a notice that the English text is the reference. The wording rules are in the ydongy handbook (`handbook/guides/legal.md`).
+The app only links to the website pages (`ProductLinks`); it does not embed or duplicate them. The legal pages of the other eight languages open with a notice that the English text is the reference.
 
 ## Facts that must match the code
 
@@ -24,7 +23,7 @@ The app only links to the website pages (`ProductLinks`); it does not embed or d
 | The app holds no credential and no license key | No Keychain code in the baseline | `privacy.sections[3]`, `terms.sections[4]` | review |
 | The app contacts no licensing service | No licensing code in the baseline | `terms.sections[3]` | review |
 | Dodo Payments is the merchant of record | Not in code; the payment is on the website | `terms.sections[7]` | review |
-| Refunds are available within 14 days of buying | The Dodo process; not in code | `refund.sections[0]` | `check_facts.py` |
+| Refunds are available within 14 days of buying | The Dodo process; not in code | `refund.sections[0]` | review |
 
 ## Refund policy
 

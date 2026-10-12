@@ -1,21 +1,129 @@
-# Every PR must pass; the jobs are defined once for ydongy in
-# ydongy/.github (handbook/stacks/swift.md, "CI").
+# Two kinds of job, because hosted macOS minutes cost ten times Linux minutes in a private repository:
+#   tooling  (Linux)  every pull request and every push to main: script syntax, tests of the changelog tooling,
+#                     the secret scan of the history. Needs no Mac.
+#   macos    (macOS)  only by hand (Actions > CI > Run workflow) and for a pull request that changes
+#                     Config/Version.xcconfig, a release candidate: xcodegen, swift-format, tests of the release
+#                     scripts, build, tests.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  XCODE_MAJOR: "27" # the Xcode the app is built with (README)
 
 jobs:
-  ci:
-    uses: ydongy/.github/.github/workflows/macos-ci.yml@main
-    with:
-      project: Template.xcodeproj
-      scheme: Template
-      lint-paths: Template TemplateCore TemplateTests
-      run-compat: ${{ github.event_name == 'push' }}
+  tooling:
+    name: Script syntax, changelog tooling, secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the secret scan reads the whole history
+
+      - name: Shell and Python syntax
+        run: |
+          for f in scripts/*.sh; do bash -n "$f"; done
+          python3 -m py_compile scripts/*.py
+
+      - name: Tests of the changelog tooling
+        run: python3 scripts/test_website_changelog.py
+
+      - name: Secret scan of the history
+        run: python3 scripts/scan_secrets.py
+
+  changes:
+    name: Release candidate?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      macos: ${{ steps.diff.outputs.macos }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          case "$EVENT" in
+            workflow_dispatch) echo "macos=true" >> "$GITHUB_OUTPUT" ;;
+            pull_request)
+              if git diff --name-only "origin/$BASE...HEAD" | grep -qx 'Config/Version.xcconfig'; then
+                echo "macos=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "macos=false" >> "$GITHUB_OUTPUT"
+              fi ;;
+            *) echo "macos=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+  macos:
+    name: macOS · format, build, test
+    needs: changes
+    if: ${{ needs.changes.outputs.macos == 'true' }}
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select Xcode ${{ env.XCODE_MAJOR }}
+        run: |
+          app="$(ls -d "/Applications/Xcode_${XCODE_MAJOR}"*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -z "$app" ]; then
+            newest="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1 | sed 's/.*Xcode_//; s/\.app//')"
+            echo "::error::this runner image has no Xcode ${XCODE_MAJOR} (the newest is $newest). The app is built with Xcode ${XCODE_MAJOR}: run the Xcode checks locally until the hosted image has it."
+            exit 1
+          fi
+          sudo xcode-select -s "$app"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: command -v xcodegen > /dev/null || brew install xcodegen
+
+      - name: Project is up to date
+        run: |
+          xcodegen generate --quiet
+          git diff --exit-code -- '*.xcodeproj' || {
+            echo "::error::project.yml changed but the generated project was not committed; run xcodegen generate"; exit 1; }
+
+      - name: Format check
+        run: xcrun swift-format lint --strict --recursive --parallel Template TemplateCore TemplateTests
+
+      - name: Resolve packages (retried; the Sparkle binary download is occasionally refused)
+        run: |
+          for attempt in 1 2 3; do
+            xcodebuild -resolvePackageDependencies -project Template.xcodeproj -scheme Template && exit 0
+            echo "attempt $attempt failed; retrying in 20s"; sleep 20
+          done
+          exit 1
+
+      - name: Tests of the release scripts
+        run: scripts/test-release.sh
+
+      - name: Build (Release)
+        run: |
+          set -o pipefail
+          xcodebuild build -project Template.xcodeproj -scheme Template \
+            -configuration Release -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        # COMPAT_RUN=1 reaches the tests as an environment variable; suites that need real sockets are disabled
+        # with it. The hosted macOS image is unreliable for them.
+        env:
+          TEST_RUNNER_COMPAT_RUN: "1"
+        run: |
+          set -o pipefail
+          xcodebuild test -project Template.xcodeproj -scheme Template \
+            -destination 'platform=macOS' -testLanguage en -testRegion US CODE_SIGNING_ALLOWED=NO

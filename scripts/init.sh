@@ -11,9 +11,10 @@
 #             support@<domain>. Example: acme.com
 #   --license mit (default): an open-source project (MIT LICENSE, README, CONTRIBUTING, AGENTS.md, CHANGELOG,
 #             self-contained CI, PR-title check, Dependabot, CODEOWNERS).
-#             proprietary: the closed-source product skeleton (terms of service as LICENSE, specification,
-#             legal, roadmap, website, process and release-plan documents, the repository-type marker and
-#             documents-check config, workflows calling ydongy's shared CI, documents-check and release workflows).
+#             proprietary: the same open-source standard plus the closed-source layer: terms of service as
+#             LICENSE, specification, design, legal, website, releasing, roadmap and security-review documents,
+#             the Chinese changelog and its website tool, a CI whose macOS job runs only for release candidates,
+#             a self-contained release workflow, .claude/ and .codex/.
 #   --owner   GitHub user or organisation for CODEOWNERS and URLs (default: inferred from the git remote
 #             "origin"; when it cannot be inferred CODEOWNERS gets the placeholder "* @<owner>")
 #   --repo    GitHub repository name (default: the lowercase product name)
@@ -67,7 +68,7 @@ BUNDLE_ID="$REVERSED.app"
 # The GitHub owner: --owner, else the "origin" remote, else unknown (CODEOWNERS gets a placeholder).
 OWNER_KNOWN=1
 if [[ -z "$OWNER" ]]; then
-  remote="$(git remote get-url origin 2> /dev/null || true)"
+  remote="$(git config --get remote.origin.url 2> /dev/null || true)"
   OWNER="$(printf '%s' "$remote" | sed -nE 's#^(https://([^/@]+@)?github\.com/|git@github\.com:|ssh://git@github\.com/)([^/]+)/[^/]+$#\3#p')"
 fi
 [[ -n "$OWNER" ]] || { OWNER_KNOWN=0; OWNER="ydongy"; }
@@ -76,15 +77,15 @@ fi
 log "Initialising $NAME ($DOMAIN, bundle id $BUNDLE_ID, repository $OWNER/$REPO, license $LICENSE_KIND)"
 
 # 0. The skeleton files of the chosen license go over the tree first, so that steps 1 and 2 treat them like
-#    every other file. A proprietary product has no use for the open-source contribution machinery.
+#    every other file. The template root already holds the shared open-source files (CONTRIBUTING, pr-title,
+#    Dependabot, the editor config); each skeleton adds or replaces the rest.
 if [[ "$LICENSE_KIND" == "proprietary" ]]; then
   cp -R .template/product/. .
-  rm -f CONTRIBUTING.md .github/workflows/pr-title.yml .github/CODEOWNERS
 else
   cp -R .template/oss/. .
-  if [[ $OWNER_KNOWN -eq 1 ]]; then printf '* @%s\n' "$OWNER" > .github/CODEOWNERS
-  else printf '* @<owner>\n' > .github/CODEOWNERS; fi
 fi
+if [[ $OWNER_KNOWN -eq 1 ]]; then printf '* @%s\n' "$OWNER" > .github/CODEOWNERS
+else printf '* @<owner>\n' > .github/CODEOWNERS; fi
 rm -rf .template
 
 # 1. File and directory names (deepest first, so parents are renamed after their children).
@@ -119,8 +120,8 @@ rules = [
     ("example.com", domain),
     ("Template", name),
 ]
-# The ADR index template has an H2 literally named "Template" (the heading of the record template):
-# it is a heading name, not the product, and the docs check compares it.
+# The ADR index may have an H2 literally named "Template" (the heading of the record template):
+# it is a heading name, not the product.
 KEEP = "\0KEEP-H2\0"
 
 
@@ -170,10 +171,10 @@ if [[ $GENERATE -eq 1 ]]; then
   xcodegen generate --quiet
 fi
 
-# 5. Anything that still says Template is a mistake, except the template markers.
+# 5. Anything that still says Template is a mistake.
 leftover="$(grep -rIn --exclude-dir=.git --exclude-dir=build --exclude-dir=.build --exclude=init.sh \
-  -e 'Template' -e 'example\.com' . | grep -v -e 'template: ' -e '(template: app/LICENSE' -e ':## Template$' || true)"
-[[ $OWNER_KNOWN -eq 1 || "$LICENSE_KIND" == "proprietary" ]] || printf 'warning: could not infer the GitHub owner; .github/CODEOWNERS contains the placeholder "* @<owner>". Fix it (or rerun with --owner).\n' >&2
+  -e 'Template' -e 'example\.com' . | grep -v -e ':## Template$' || true)"
+[[ $OWNER_KNOWN -eq 1 ]] || printf 'warning: could not infer the GitHub owner; .github/CODEOWNERS contains the placeholder "* @<owner>". Fix it (or rerun with --owner).\n' >&2
 if [[ -n "$leftover" ]]; then
   printf 'warning: these lines still mention the template name or example.com:\n%s\n' "$leftover" >&2
 fi
@@ -182,10 +183,13 @@ log "Done. Next:"
 if [[ "$LICENSE_KIND" == "proprietary" ]]; then
 cat <<EOF
   1. Edit docs/spec.md, docs/design.md and design/ for the real product; replace the Example screen.
+     Check LICENSE (terms, copyright holder) and .github/CODEOWNERS.
   2. Sparkle: generate_keys --account $LOWER, put the public key in SPARKLE_PUBLIC_KEY (project.yml),
      then xcodegen generate.
   3. scripts/release-credentials.sh set   (signing, notarization, R2 settings in your login keychain)
-  4. Review "git status" and commit the list of files you checked (no blind staging).
+  4. Release workflow: create the GitHub environment "release" (deployment branch policy: main only) and its
+     secrets; the list is in docs/releasing.md.
+  5. Review "git status" and commit the list of files you checked (no blind staging).
 EOF
 else
 cat <<EOF

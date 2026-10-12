@@ -20,7 +20,7 @@ or from [example.com](https://example.com), drag Template to Applications and op
 
 ## Development
 
-Requirements: macOS 26.0 or later, Xcode 26.6 or later, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Requirements: macOS 26.0 or later, Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 After changing `project.yml`, run `xcodegen generate` and commit `Template.xcodeproj`; CI fails if it is stale.
 The version lives in `Config/Version.xcconfig` only and is changed with `scripts/bump.sh <X.Y.Z>`.
 
