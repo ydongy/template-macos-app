@@ -75,8 +75,8 @@ and pull request titles follow [Conventional Commits](https://www.conventionalco
 
 ## Security
 
-Report vulnerabilities privately to support@example.com; do not open a public issue. Security reviews are kept in
-[docs/security/](docs/security/README.md).
+Report vulnerabilities privately as the account's security policy describes (GitHub private vulnerability
+reporting); do not open a public issue. Security reviews are kept in [docs/security/](docs/security/README.md).
 
 ## Acknowledgements
 

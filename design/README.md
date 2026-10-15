@@ -13,10 +13,6 @@ The colors in the mockups are approximations of the macOS system colors; the app
 | Example | `screens/example.html` | loading, loaded, empty, failed | yes |
 | Design tokens | `tokens.html` | not a screen: the tokens as swatches and samples | yes |
 
-## Decision log
-
-None.
-
 ## Maintenance
 
-Edit the mockup first, get it signed off, then change the UI code that matches it. A screen file is named like the code directory `Template/UI/<Screen>/`, shows every state through `?state=` and appears in the table above. The CSS custom properties carry the names and numbers of `TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift`: a token changes in the Swift file, in `docs/design.md`, in `tokens.html` and in each screen's `:root` block together. Screenshots exported from a Mac at acceptance go to `design/screenshots/<screen>/{light,dark}.png`.
+Edit the mockup first, get the visual direction confirmed by the maintainer, then change the UI code that matches it. A screen file is named like the code directory `Template/UI/<Screen>/`, shows every state through `?state=` and appears in the table above. The CSS custom properties carry the names and numbers of `TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift`: a token changes in the Swift file, in `docs/design.md`, in `tokens.html` and in each screen's `:root` block together. Screenshots of the running app are not tracked: capture them into `design/screenshots/` (ignored) and show light and dark in the pull request description.

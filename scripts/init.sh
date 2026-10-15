@@ -155,8 +155,9 @@ for path in files:
 print(f"rewrote {changed} files")
 PY
 
-# 3. Remove the template-only scripts (this one last).
+# 3. Remove the template-only scripts (this one last) and the lines that name them.
 rm -f scripts/test-init.sh
+grep -v 'scripts/test-init.sh' CONTRIBUTING.md > CONTRIBUTING.md.tmp && mv CONTRIBUTING.md.tmp CONTRIBUTING.md
 
 # 4. Longer or shorter names change import order and line lengths: format the sources, then regenerate.
 if xcrun --find swift-format > /dev/null 2>&1; then

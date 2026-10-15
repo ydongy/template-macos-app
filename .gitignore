@@ -25,6 +25,9 @@ Package.resolved
 .vscode/
 .idea/
 
+# Screenshots of the running app: shown in pull requests, never tracked
+design/screenshots/
+
 # Local-only
 .lody/
 *.local.*

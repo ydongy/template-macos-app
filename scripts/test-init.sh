@@ -80,6 +80,13 @@ common_assertions() { # common_assertions <owner> <license>
     [[ ! -e "$path" ]] && pass "absent: $path" || fail "absent: $path"
   done
   readme_assertions "$1" "$2"
+  grep -q "test-init" CONTRIBUTING.md && fail "CONTRIBUTING.md names no template-only script" || pass "CONTRIBUTING.md names no template-only script"
+  grep -q "^## Issues and pull requests" AGENTS.md && grep -q "## Version and environment" AGENTS.md && grep -q "## How tested" AGENTS.md \
+    && pass "AGENTS.md spells out the issue forms and the pull request body" || fail "AGENTS.md spells out the issue forms and the pull request body"
+  grep -qF 'no blind `git add -A`' AGENTS.md || grep -qF 'No blind `git add -A`' AGENTS.md \
+    && pass "AGENTS.md has the staging red line" || fail "AGENTS.md has the staging red line"
+  grep -q "Simplified Chinese" CONTRIBUTING.md && pass "CONTRIBUTING.md has the language rule" || fail "CONTRIBUTING.md has the language rule"
+  grep -qx "design/screenshots/" .gitignore && pass "design/screenshots/ is ignored" || fail "design/screenshots/ is ignored"
   [[ "$(cat CLAUDE.md)" == "@AGENTS.md" ]] && pass "CLAUDE.md is @AGENTS.md" || fail "CLAUDE.md is @AGENTS.md"
   if grep -rqE --exclude-dir=.git "uses: ydongy/" .github; then fail "workflows are self-contained"; else pass "workflows are self-contained"; fi
   grep -q "XCODE_MAJOR" .github/workflows/ci.yml && pass "ci.yml selects Xcode by major version" || fail "ci.yml selects Xcode by major version"
@@ -178,7 +185,9 @@ COPY="$TMP/proprietary"; new_copy "$COPY" "https://github.com/ydongy/probe.git";
 if scripts/init.sh --license proprietary "$NAME" "$DOMAIN" > "$TMP/init4.log" 2>&1; then pass "init.sh succeeds"; else fail "init.sh succeeds"; cat "$TMP/init4.log"; fi
 grep -q "^warning:" "$TMP/init4.log" && { fail "init.sh reports no leftovers"; grep "^warning:" "$TMP/init4.log"; } || pass "init.sh reports no leftovers"
 common_assertions ydongy proprietary
-head -1 LICENSE | grep -q "^Terms of Service" && pass "LICENSE is the proprietary terms" || fail "LICENSE is the proprietary terms"
+head -1 LICENSE | grep -qx "Copyright (c) 2026 ydongy. All rights reserved." && grep -qx "Probe Terms of Service" LICENSE \
+  && pass "LICENSE is the proprietary terms" || fail "LICENSE is the proprietary terms"
+grep -q "<!--" LICENSE && fail "LICENSE has no template comment" || pass "LICENSE has no template comment"
 grep -q "All rights reserved" LICENSE && pass "LICENSE reserves all rights" || fail "LICENSE reserves all rights"
 [[ "$(cat .github/CODEOWNERS)" == "* @ydongy" ]] && pass "CODEOWNERS is generated" || fail "CODEOWNERS is generated"
 for path in docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/releasing.md docs/security/README.md CHANGELOG.zh.md \

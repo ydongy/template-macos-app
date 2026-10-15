@@ -65,6 +65,26 @@ Commit messages and PR titles use Conventional Commits: `feat|fix|docs|refactor|
 - `CHANGELOG.md` and `CHANGELOG.zh.md` carry the same bullets; the Chinese file feeds the website's changelog page (`scripts/website-changelog.py`).
 - Never force-unwrap user input; throw typed errors; error messages are localizable and say what happened and what to do.
 
+## Issues and pull requests
+
+`gh issue create` and `gh pr create --body` skip the issue forms and the pull request template, so write their
+structure yourself. Search open issues first; one issue is one problem.
+
+- Issue title: one short sentence that says the problem or the outcome, in English or Simplified Chinese. No type
+  prefix such as `[feat]`; the label carries the type.
+- Bug, `--label bug`: `## What happened`, `## What you expected`, `## Steps to reproduce`,
+  `## Version and environment`.
+- Feature or improvement, `--label enhancement`: `## Problem`, `## Proposed solution`,
+  `## Alternatives considered` (when there were any), `## Done when`.
+- Documentation, `--label documentation`: `## Where`, `## What is missing, unclear or wrong`, `## Suggested change`.
+- Labels: the common set (`bug`, `enhancement`, `documentation`, `question`, `dependencies` and so on), plus any scope
+  labels this repository adds; no labels that repeat a commit type or a process state.
+- Pull request: the title is the Conventional Commits subject (it becomes the squash commit). The body has
+  `## Summary` (what changes and why), `## Related issue` (`Closes #<n>`, or `None.`), `## How tested` (the
+  commands run and their results, and what was not run) and `## Checklist`:
+  `- [ ] PR title follows Conventional Commits`, `- [ ] Tests pass`,
+  `- [ ] Documentation updated where behavior changed`, ticked only when true.
+
 ## Red lines
 
 - Credentials never appear in PRs, issues, logs, reports or chat.

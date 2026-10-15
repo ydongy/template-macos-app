@@ -74,7 +74,7 @@ xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
 
 ## 安全
 
-请私下将漏洞报告至 support@example.com，不要公开提 issue。各版本的安全审查保存在
+请按账号的安全策略私下报告漏洞（GitHub 私密漏洞报告），不要公开提 issue。各版本的安全审查保存在
 [docs/security/](docs/security/README.md)。
 
 ## 致谢
