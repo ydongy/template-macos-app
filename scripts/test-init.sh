@@ -103,6 +103,13 @@ readme_assertions() {
   if [[ "$2" == proprietary ]]; then
     grep -q 'license-proprietary' README.md && grep -q 'license-proprietary' README.zh-CN.md \
       && ! grep -q 'actions/workflows/ci.yml/badge' README.md README.zh-CN.md && pass "proprietary badges, no CI badge" || fail "proprietary badges, no CI badge"
+    local badge='![Status](https://img.shields.io/badge/status-pre--release-orange)'
+    grep -qF "$badge" README.md && grep -qF "$badge" README.zh-CN.md && pass "READMEs carry the pre-release badge" || fail "READMEs carry the pre-release badge"
+    grep -q '^Status: pre-release\..*\[docs/launch.md\](docs/launch.md)' README.md && grep -q '^当前状态：预发布。.*\[docs/launch.md\](docs/launch.md)' README.zh-CN.md \
+      && pass "READMEs have the status sentence linking docs/launch.md" || fail "READMEs have the status sentence linking docs/launch.md"
+    if grep -qE "badge/website|https://$DOMAIN|https://dl\.$DOMAIN|support@$DOMAIN" README.md README.zh-CN.md; then
+      fail "pre-release READMEs name no website, download or mailbox"; grep -nE "badge/website|https://$DOMAIN|https://dl\.$DOMAIN|support@$DOMAIN" README.md README.zh-CN.md
+    else pass "pre-release READMEs name no website, download or mailbox"; fi
   else
     grep -q "actions/workflows/ci.yml/badge" README.md && grep -q "actions/workflows/ci.yml/badge" README.zh-CN.md \
       && grep -q "github.com/$1/probe/" README.md && grep -q "github.com/$1/probe/" README.zh-CN.md \
@@ -134,6 +141,18 @@ build_checks() {
   check "release script tests" scripts/test-release.sh
   [[ ! -f scripts/test_website_changelog.py ]] || check "changelog script tests" python3 scripts/test_website_changelog.py
 }
+
+# ---------------- the launch copy of release.yml stays maintained in the template ----------------
+echo "== .template/launch"
+LAUNCH_WF="$SRC/.template/launch/.github/workflows/release.yml"
+[[ -f "$LAUNCH_WF" ]] && pass "exists: .template/launch/.github/workflows/release.yml" || fail "exists: .template/launch/.github/workflows/release.yml"
+grep -q "environment: release" "$LAUNCH_WF" && grep -q "scripts/release.sh" "$LAUNCH_WF" && ! grep -qE "uses: ydongy/|Template|example\.com" "$LAUNCH_WF" \
+  && pass "launch release.yml is self-contained and names no product" || fail "launch release.yml is self-contained and names no product"
+if command -v actionlint > /dev/null; then
+  # Syntax, expressions and action inputs; shellcheck is off (its style notes are not errors here).
+  check "actionlint: launch release.yml and the skeleton workflows" actionlint -shellcheck= "$LAUNCH_WF" \
+    "$SRC/.template/product/.github/workflows/ci.yml" "$SRC"/.github/workflows/*.yml
+else echo "skip actionlint (not installed)"; fi
 
 # ---------------- refusals leave the copy untouched ----------------
 echo "== refusals"
@@ -190,16 +209,27 @@ head -1 LICENSE | grep -qx "Copyright (c) 2026 ydongy. All rights reserved." && 
 grep -q "<!--" LICENSE && fail "LICENSE has no template comment" || pass "LICENSE has no template comment"
 grep -q "All rights reserved" LICENSE && pass "LICENSE reserves all rights" || fail "LICENSE reserves all rights"
 [[ "$(cat .github/CODEOWNERS)" == "* @ydongy" ]] && pass "CODEOWNERS is generated" || fail "CODEOWNERS is generated"
-for path in docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/releasing.md docs/security/README.md CHANGELOG.zh.md \
-  .github/workflows/release.yml .claude/settings.json .codex/config.toml scripts/website-changelog.py scripts/test_website_changelog.py; do
+for path in docs/spec.md docs/legal.md docs/roadmap.md docs/website.md docs/releasing.md docs/launch.md docs/security/README.md CHANGELOG.zh.md \
+  .claude/settings.json .codex/config.toml scripts/website-changelog.py scripts/test_website_changelog.py; do
   [[ -e "$path" ]] && pass "exists: $path" || fail "exists: $path"
 done
 grep -q "^## \[Unreleased\]" CHANGELOG.md && grep -q "^## \[Unreleased\]" CHANGELOG.zh.md && pass "both changelogs have [Unreleased]" || fail "both changelogs have [Unreleased]"
 grep -q "Probe.xcodeproj" .github/workflows/ci.yml && grep -q "Probe ProbeCore ProbeTests" .github/workflows/ci.yml \
   && grep -q "Config/Version.xcconfig" .github/workflows/ci.yml && grep -q "workflow_dispatch" .github/workflows/ci.yml \
   && pass "ci.yml names the product and gates the macOS job" || fail "ci.yml names the product and gates the macOS job"
-grep -q "environment: release" .github/workflows/release.yml && grep -q "scripts/release.sh" .github/workflows/release.yml \
-  && pass "release.yml is self-contained" || fail "release.yml is self-contained"
+# Pre-release: no release workflow; docs/launch.md carries the launch steps and every place that names the domain.
+[[ ! -e .github/workflows/release.yml ]] && pass "absent: .github/workflows/release.yml (pre-release)" || fail "absent: .github/workflows/release.yml (pre-release)"
+launch_ok=1
+for needle in '.template/launch/.github/workflows/release.yml' 'deployment branch policy' 'releasing.md#release-workflow-setup' \
+  'Rehearsal' 'chore(release): launch <version>' '## After launch' 'project.yml' 'Config/release.conf' 'Probe/App/ProductLinks.swift' \
+  'LICENSE' "support@$DOMAIN" "https://dl.$DOMAIN"; do
+  grep -qF -- "$needle" docs/launch.md || { launch_ok=0; echo "missing in docs/launch.md: $needle"; }
+done
+[[ $launch_ok -eq 1 ]] && pass "docs/launch.md lists the launch steps and the domain places" || fail "docs/launch.md lists the launch steps and the domain places"
+grep -q '^- \[ \] ' docs/launch.md && pass "docs/launch.md is a checklist" || fail "docs/launch.md is a checklist"
+grep -qF '(launch.md)' docs/releasing.md && pass "docs/releasing.md points to docs/launch.md" || fail "docs/releasing.md points to docs/launch.md"
+grep -q 'docs/launch.md' AGENTS.md && grep -q 'docs/launch.md' CONTRIBUTING.md && pass "AGENTS.md and CONTRIBUTING.md state the pre-release state" \
+  || fail "AGENTS.md and CONTRIBUTING.md state the pre-release state"
 if [[ $FULL -eq 1 ]]; then
   build_checks
 else

@@ -14,7 +14,8 @@
 #             proprietary: the same open-source standard plus the closed-source layer: terms of service as
 #             LICENSE, specification, design, legal, website, releasing, roadmap and security-review documents,
 #             the Chinese changelog and its website tool, a CI whose macOS job runs only for release candidates,
-#             a self-contained release workflow, .claude/ and .codex/.
+#             .claude/ and .codex/. The product starts pre-release: no release workflow, and docs/launch.md
+#             lists what remains before launch (the release workflow is copied from .template/launch/ then).
 #   --owner   GitHub user or organisation for CODEOWNERS and URLs (default: inferred from the git remote
 #             "origin"; when it cannot be inferred CODEOWNERS gets the placeholder "* @<owner>")
 #   --repo    GitHub repository name (default: the lowercase product name)
@@ -187,10 +188,10 @@ cat <<EOF
      Check LICENSE (terms, copyright holder) and .github/CODEOWNERS.
   2. Sparkle: generate_keys --account $LOWER, put the public key in SPARKLE_PUBLIC_KEY (project.yml),
      then xcodegen generate.
-  3. scripts/release-credentials.sh set   (signing, notarization, R2 settings in your login keychain)
-  4. Release workflow: create the GitHub environment "release" (deployment branch policy: main only) and its
-     secrets; the list is in docs/releasing.md.
-  5. Review "git status" and commit the list of files you checked (no blind staging).
+  3. The product is pre-release: docs/launch.md lists what remains before launch (domain, mailbox, downloads,
+     signing, and the release workflow with its "release" environment and secrets). Keep this template's
+     .template/launch/.github/workflows/release.yml at hand; it is added at launch.
+  4. Review "git status" and commit the list of files you checked (no blind staging).
 EOF
 else
 cat <<EOF

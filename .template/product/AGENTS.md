@@ -2,11 +2,11 @@
 
 ## What it is
 
-Template is a macOS menu bar app (SwiftUI, Swift 6, macOS 26.0+) whose panel shows one list of items with a status each, in four states: loading, loaded, empty and failed. It is closed source, notarized and downloaded from `https://example.com`; updates use Sparkle 2. The sample screen is called Example; a product replaces its contents and keeps the structure.
+Template is a macOS menu bar app (SwiftUI, Swift 6, macOS 26.0+) whose panel shows one list of items with a status each, in four states: loading, loaded, empty and failed. It is closed source and pre-release until launch (`docs/launch.md`); once launched it is notarized and downloaded from the product website, and updates use Sparkle 2. The sample screen is called Example; a product replaces its contents and keeps the structure.
 
 ## Sources of truth
 
-- What to build: `docs/spec.md` (stable headings; link `docs/spec.md#updates`, never a section number). How it looks and moves: `docs/design.md` and `design/README.md`. Why it is built this way: `docs/adr/README.md`. Legal facts and the code that must match them: `docs/legal.md`. What the app needs from the website: `docs/website.md`. How a release is made: `docs/releasing.md`. Security reviews, one per version: `docs/security/`. What comes next: `docs/roadmap.md`. Contribution rules: `CONTRIBUTING.md`.
+- What to build: `docs/spec.md` (stable headings; link `docs/spec.md#updates`, never a section number). How it looks and moves: `docs/design.md` and `design/README.md`. Why it is built this way: `docs/adr/README.md`. Legal facts and the code that must match them: `docs/legal.md`. What the app needs from the website: `docs/website.md`. How a release is made: `docs/releasing.md`. What remains before launch (the product is pre-release until then): `docs/launch.md`. Security reviews, one per version: `docs/security/`. What comes next: `docs/roadmap.md`. Contribution rules: `CONTRIBUTING.md`.
 - Docs win over code. If they disagree, fix the docs first, then the code, and say so in the PR.
 
 ## Directory boundaries
@@ -23,7 +23,7 @@ TemplateCore/            Local SwiftPM package, no third-party dependency (docs/
   Sources/TemplateCore/  Domain/ (nonisolated values) · Services/ (protocols, Live, DEBUG mock, UICopy) · Design/ (DesignTokens)
 TemplateTests/           Unit tests (Swift Testing), @testable import of both modules
 design/                  Mockups: screens/example.html, tokens.html
-docs/                    spec · design · roadmap · legal · website · releasing · adr/ · security/
+docs/                    spec · design · roadmap · legal · website · releasing · launch · adr/ · security/
 scripts/                 bump.sh · release.sh · release-credentials.sh · test-release.sh · scan_secrets.py ·
                          website-changelog.py · test_website_changelog.py · ax-audit.swift
 ```
@@ -61,6 +61,7 @@ Commit messages and PR titles use Conventional Commits: `feat|fix|docs|refactor|
 - `MockExampleSource` and preview data are DEBUG-only; `FORBID_SYMBOLS` in `Config/release.conf` makes the release script fail if they reach a Release build. A new Mock or Preview type is added to that list.
 - Every interactive element has an `accessibilityIdentifier` named `<screen>.<element>` (`example.refresh`, `menubar.quit`) and a label; decorative elements use `accessibilityHidden(true)`.
 - The updater is off while `SPARKLE_PUBLIC_KEY` in `project.yml` is empty. Never commit a private key.
+- Pre-release: no `release` environment, release secrets or release workflow, no tag and no GitHub Release; changelog notes stay under `## [Unreleased]`. Public text (READMEs) links no address that does not exist yet; `docs/launch.md` lists every place that names the planned domain.
 - Keep `lint-paths` in `.github/workflows/ci.yml` and the source roots of `UserVisibleStringsTests` in step with the directories.
 - `CHANGELOG.md` and `CHANGELOG.zh.md` carry the same bullets; the Chinese file feeds the website's changelog page (`scripts/website-changelog.py`).
 - Never force-unwrap user input; throw typed errors; error messages are localizable and say what happened and what to do.
@@ -89,7 +90,8 @@ structure yourself. Search open issues first; one issue is one problem.
 
 - Credentials never appear in PRs, issues, logs, reports or chat.
 - Signing, releases and anything sent to an external service need the maintainer's confirmation.
-- Merging a version bump to `main` publishes a release (`docs/releasing.md`).
+- Merging a version bump to `main` publishes a release once the release workflow exists; until launch there is none
+  (`docs/launch.md`, `docs/releasing.md`).
 - No blind `git add -A` of unknown files; stage the files you checked.
 - Never modify the user's dotfiles or global Git configuration.
 - Changes involving credentials, the Keychain, networking or code signing need a security walkthrough recorded in the PR.

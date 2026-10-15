@@ -1,4 +1,4 @@
-# Release: merging a version bump to main publishes Template (docs/releasing.md, "Releasing"). Nobody pushes a tag:
+# Release: merging a version bump to main publishes the app (docs/releasing.md, "Releasing"). Nobody pushes a tag:
 # this workflow creates it, on the commit it built, after the release is published.
 #
 #   verify   (Linux, free)  script syntax, tests of the changelog tooling, the changelog has the version

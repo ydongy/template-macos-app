@@ -74,11 +74,11 @@ scripts/init.sh <Name> <domain> [--license mit|proprietary] [--owner <github-use
 | | `--license mit` | `--license proprietary` |
 |---|---|---|
 | `LICENSE` | MIT | 服务条款，保留所有权利 |
-| `README.md` 与 `README.zh-CN.md` | 开源 README，带 MIT 徽章和 CI 徽章 | 产品 README，带 proprietary 徽章、无 CI 徽章，并附文档索引 |
+| `README.md` 与 `README.zh-CN.md` | 开源 README，带 MIT 徽章和 CI 徽章 | 产品 README，带 proprietary 徽章和预发布状态徽章及状态说明，无 CI 徽章、Website 徽章、下载链接或邮箱，并附文档索引 |
 | 共有文件 | `CONTRIBUTING.md`、`AGENTS.md`、`CLAUDE.md`、`CHANGELOG.md`、`CODEOWNERS`、`pr-title.yml`、Dependabot | 同样这些，措辞改为闭源版本 |
 | `ci.yml` | 每个 Pull Request 都构建并测试 | Linux 轻量检查始终运行；macOS job 只在发布候选和手动触发时运行 |
-| 发布 workflow | 无 | 自包含的 `release.yml`（签名、公证、上传） |
-| 额外文档 | 无 | `docs/spec.md`、`legal.md`、`website.md`、`releasing.md`、`roadmap.md`、`docs/security/`、`CHANGELOG.zh.md` 及官网 changelog 工具 |
+| 发布 workflow | 无 | 上线前没有；按 `docs/launch.md` 从 `.template/launch/` 复制自包含的 `release.yml`（签名、公证、上传） |
+| 额外文档 | 无 | `docs/spec.md`、`legal.md`、`website.md`、`releasing.md`、`launch.md`、`roadmap.md`、`docs/security/`、`CHANGELOG.zh.md` 及官网 changelog 工具 |
 | AI 协作配置 | `AGENTS.md` | 另有 `.claude/` 和 `.codex/` |
 
 骨架文件位于 `.template/oss/` 与 `.template/product/`。`init.sh` 把其中一份复制到工程上，把 `Template*` 重命名为 `<Name>*`，

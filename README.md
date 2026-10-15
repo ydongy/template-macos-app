@@ -75,11 +75,11 @@ scripts/init.sh <Name> <domain> [--license mit|proprietary] [--owner <github-use
 | | `--license mit` | `--license proprietary` |
 |---|---|---|
 | `LICENSE` | MIT | Terms of service, all rights reserved |
-| `README.md` and `README.zh-CN.md` | Open-source README with an MIT badge and a CI badge | Product README with a proprietary badge, no CI badge, and a documentation index |
+| `README.md` and `README.zh-CN.md` | Open-source README with an MIT badge and a CI badge | Product README with a proprietary badge, a pre-release status badge and sentence, no CI badge, no Website badge, download link or mailbox, and a documentation index |
 | Shared files | `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, `CHANGELOG.md`, `CODEOWNERS`, `pr-title.yml`, Dependabot | The same, with closed-source wording |
 | `ci.yml` | Builds and tests on every pull request | Cheap Linux checks always; the macOS job only for release candidates and manual runs |
-| Release workflow | none | Self-contained `release.yml` (signing, notarization, upload) |
-| Extra documents | none | `docs/spec.md`, `legal.md`, `website.md`, `releasing.md`, `roadmap.md`, `docs/security/`, `CHANGELOG.zh.md` and the website changelog tool |
+| Release workflow | none | None until launch; `docs/launch.md` copies the self-contained `release.yml` (signing, notarization, upload) from `.template/launch/` |
+| Extra documents | none | `docs/spec.md`, `legal.md`, `website.md`, `releasing.md`, `launch.md`, `roadmap.md`, `docs/security/`, `CHANGELOG.zh.md` and the website changelog tool |
 | AI tooling | `AGENTS.md` | Also `.claude/` and `.codex/` |
 
 The skeleton files live in `.template/oss/` and `.template/product/`; `init.sh` copies one of them over the tree,

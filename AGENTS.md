@@ -17,6 +17,7 @@ docs/, design/            Design language, ADRs, mockups
 scripts/                  Release tooling; init.sh and test-init.sh (template only)
 .template/oss/            Files init.sh installs for --license mit
 .template/product/        Files init.sh installs for --license proprietary
+.template/launch/         Files a proprietary product adds at launch (release.yml); init.sh never copies them
 ```
 
 Views depend only on models, models only on protocols. `Config/release.conf` is the single place for

@@ -6,14 +6,14 @@ A macOS menu bar utility that shows one list of items with a status each, and ke
 
 [![License](https://img.shields.io/badge/license-proprietary-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%2026%2B-lightgrey.svg)](#requirements)
-[![Website](https://img.shields.io/badge/website-example.com-informational.svg)](https://example.com)
+![Status](https://img.shields.io/badge/status-pre--release-orange)
 
 **English** · [简体中文](README.zh-CN.md)
 
 </div>
 
-Status: version 1.0.0 is in preparation. The app, the tests and the release scripts exist; the first real screen,
-signing, notarization and the website are the remaining work. See [docs/roadmap.md](docs/roadmap.md).
+Status: pre-release. Template is not available yet; what remains before launch is in [docs/launch.md](docs/launch.md).
+The app, the tests and the release scripts exist; the Example screen is a placeholder for the first real screen.
 
 ## Features
 
@@ -30,9 +30,8 @@ signing, notarization and the website are the remaining work. See [docs/roadmap.
 
 ## Quick start
 
-Download the `.dmg` from [example.com](https://example.com), drag Template to Applications and open it. The website
-shows the SHA-256 hash of each download, which `shasum -a 256 <file>` must reproduce. Updates are installed inside
-the app after you confirm them.
+There are no downloads yet. Build and run the app from source as described under [Development](#development);
+local builds are unsigned development builds, not releases.
 
 ## Development
 
@@ -58,6 +57,7 @@ xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
 | [docs/spec.md](docs/spec.md) | What to build |
 | [docs/design.md](docs/design.md) | Design language |
 | [docs/roadmap.md](docs/roadmap.md) | What comes next |
+| [docs/launch.md](docs/launch.md) | Launch checklist |
 | [docs/legal.md](docs/legal.md) | Legal facts and the code they must match |
 | [docs/website.md](docs/website.md) | What the app depends on from the website |
 | [docs/releasing.md](docs/releasing.md) | How a release is made |
@@ -85,5 +85,5 @@ see [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## License
 
-Proprietary. All rights reserved. [LICENSE](LICENSE) is the terms of service and the license agreement, with the
-same text as [example.com/terms](https://example.com/terms).
+Proprietary. All rights reserved. [LICENSE](LICENSE) is the terms of service and the license agreement, to be
+published on the product website at launch.
