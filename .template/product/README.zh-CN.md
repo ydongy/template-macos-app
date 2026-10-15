@@ -6,14 +6,14 @@ macOS 菜单栏小工具：用一份带状态的列表告诉你哪些正常、�
 
 [![License](https://img.shields.io/badge/license-proprietary-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%2026%2B-lightgrey.svg)](#环境要求)
-[![Website](https://img.shields.io/badge/website-example.com-informational.svg)](https://example.com)
+![Status](https://img.shields.io/badge/status-pre--release-orange)
 
 [English](README.md) · **简体中文**
 
 </div>
 
-当前状态：1.0.0 筹备中。应用、测试和发布脚本已就绪；第一个真实界面、签名、公证和官网仍待完成。
-详见 [docs/roadmap.md](docs/roadmap.md)。
+当前状态：预发布。Template 尚未上线，上线前剩余的事项见 [docs/launch.md](docs/launch.md)。
+应用、测试和发布脚本已就绪；Example 界面是第一个真实界面的占位。
 
 ## 功能特性
 
@@ -30,8 +30,7 @@ macOS 菜单栏小工具：用一份带状态的列表告诉你哪些正常、�
 
 ## 快速开始
 
-从 [example.com](https://example.com) 下载 `.dmg`，把 Template 拖进“应用程序”并打开。官网会给出每个下载文件的 SHA-256，
-`shasum -a 256 <file>` 的结果必须与之一致。更新会在应用内提示，确认后安装。
+目前还没有下载。请按[开发](#开发)一节从源码构建并运行；本地构建是未签名的开发版，不是发布版。
 
 ## 开发
 
@@ -57,6 +56,7 @@ xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
 | [docs/spec.md](docs/spec.md) | 要做什么 |
 | [docs/design.md](docs/design.md) | 设计语言 |
 | [docs/roadmap.md](docs/roadmap.md) | 后续计划 |
+| [docs/launch.md](docs/launch.md) | 上线检查清单 |
 | [docs/legal.md](docs/legal.md) | 法律事实及必须与之一致的代码 |
 | [docs/website.md](docs/website.md) | 应用对官网的依赖 |
 | [docs/releasing.md](docs/releasing.md) | 发布流程 |
@@ -84,5 +84,4 @@ xcrun swift-format lint --strict --recursive Template TemplateCore TemplateTests
 
 ## 许可证
 
-专有软件，保留所有权利。[LICENSE](LICENSE) 是服务条款与许可协议，文本与
-[example.com/terms](https://example.com/terms) 一致。
+专有软件，保留所有权利。[LICENSE](LICENSE) 是服务条款与许可协议，上线时将发布在产品官网上。

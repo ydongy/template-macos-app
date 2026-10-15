@@ -39,7 +39,7 @@ python3 scripts/scan_secrets.py
 | `ui` | `Template/UI`: screens, models, rows |
 | `design` | `design/` mockups and `docs/design.md` |
 | `docs` | everything else in `docs/`, README, AGENTS |
-| `release` | `scripts/release.sh`, `Config/release.conf`, changelog tooling, `release.yml` |
+| `release` | `scripts/release.sh`, `Config/release.conf`, changelog tooling, `release.yml` (after launch), `docs/launch.md` |
 | `build` | `project.yml`, the generated project, signing settings |
 | `ci` | `.github/workflows` |
 | `deps` | dependency bumps |
@@ -60,7 +60,11 @@ page of the product website (`scripts/website-changelog.py`), which is why it st
 
 ## Releasing
 
-A release is a merged version bump: `scripts/bump.sh <X.Y.Z>` edits `Config/Version.xcconfig` and turns
-`[Unreleased]` into the new version in both changelogs, and merging that pull request to `main` publishes the
+Template is pre-release until launch: there is no release workflow, so changelog notes stay under `[Unreleased]`
+and nothing is published. What remains, including adding the release workflow, is in
+[docs/launch.md](docs/launch.md).
+
+After launch, a release is a merged version bump: `scripts/bump.sh <X.Y.Z>` edits `Config/Version.xcconfig` and
+turns `[Unreleased]` into the new version in both changelogs, and merging that pull request to `main` publishes the
 release. Steps, secrets and recovery are in [docs/releasing.md](docs/releasing.md). Each version also gets a
 security review in `docs/security/`.

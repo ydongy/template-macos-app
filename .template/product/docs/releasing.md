@@ -3,6 +3,9 @@
 How a Template release is made, what it needs and what to do when one goes wrong. Contribution rules (scopes,
 branches, changelog bullets) are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+Until launch Template is pre-release: there is no `release.yml`, no `release` environment and no release secret, and
+nothing is published; see [launch.md](launch.md). This file describes how releases work after launch.
+
 ## Version
 
 `Config/Version.xcconfig` holds `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`; only `scripts/bump.sh <X.Y.Z>`
@@ -32,7 +35,8 @@ ref and uploads nothing. `publish` works only on `main`. A release can also be m
 
 ## Release workflow setup
 
-`release.yml` calls no shared workflow; everything is in the repository.
+`release.yml` calls no shared workflow; everything is in the repository. It is added at launch, together with the
+environment and secrets below ([launch.md](launch.md#launch)).
 
 - **Environment `release`** (Settings > Environments): add a deployment branch policy that allows only `main`, so
   a workflow of another branch never sees the secrets. (Required reviewers on a private repository need a paid

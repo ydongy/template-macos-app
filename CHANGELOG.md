@@ -20,3 +20,6 @@ All notable changes to this template are documented here. The format is based on
 - The proprietary `LICENSE` opens with the copyright line and carries no template comment; the product README
   points security reports to private vulnerability reporting instead of a mailbox.
 - `design/screenshots/` is ignored: screenshots of the running app go into pull request descriptions.
+- `--license proprietary` generates a pre-release product: both READMEs carry a pre-release status badge and a
+  status sentence linking the new `docs/launch.md` launch checklist, and name no website, download link or support
+  mailbox. The release workflow is no longer installed; it is kept in `.template/launch/` and copied in at launch.

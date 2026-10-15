@@ -10,7 +10,7 @@ Version 1.0 is the first release: a menu bar panel with the Example screen in fo
 
 ## Needed before the first release
 
-The Developer ID certificate and notarization profile, the Sparkle key pair (the public key goes into `SPARKLE_PUBLIC_KEY` in `project.yml`, the private key stays in the keychain with an offline backup), the website with its legal pages, the downloads bucket, and the `release` environment with its secrets ([releasing.md](releasing.md)).
+The product is pre-release until then; every remaining step (domain, website, mailbox, downloads bucket, signing, the Sparkle key pair, the release workflow with its environment and secrets) is in [launch.md](launch.md).
 
 ## Later
 
