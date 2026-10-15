@@ -7,11 +7,14 @@
 | Terms of service | `LICENSE` (English), published at `https://example.com/terms` |
 | Privacy policy | `https://example.com/privacy` |
 | Refund policy | `https://example.com/refund` |
-| Support address | `support@example.com`, the same in `LICENSE`, `SECURITY.md` and the website footer |
+| Support address | `support@example.com`, the same in `LICENSE` and the website footer |
 
 The app only links to the website pages (`ProductLinks`); it does not embed or duplicate them. The legal pages of the other eight languages open with a notice that the English text is the reference.
 
 ## Facts that must match the code
+
+The sections of `LICENSE` that depend on the product: "Your data and credentials" says what the product touches on the user's behalf; "Free plan and Pro", "License key" and "Activation and verification" describe the plans and the licensing service. Rewrite them together with the code when the product adds paid plans.
+
 
 | Fact | Code | Website key | Check |
 |---|---|---|---|

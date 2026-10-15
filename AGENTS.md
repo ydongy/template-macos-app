@@ -49,8 +49,31 @@ scripts/test-init.sh           # init.sh on throw-away copies for both licenses
   release script if they reach a Release build.
 - Keep the lint paths in `.github/workflows/ci.yml` in step with the source directories.
 - Commit messages and PR titles use Conventional Commits: `feat|fix|docs|refactor|perf|test|build|ci|chore|revert(scope)!: subject`.
+  Branches are `<type>/<issue>-<slug>`; the maintainer squash-merges; no sign-off.
+- A UI change starts from the mockup in `design/screens/`; the maintainer confirms the visual direction before UI
+  code is written. Screenshots go in the pull request body, never in the repository.
+
+## Issues and pull requests
+
+`gh issue create` and `gh pr create --body` skip the issue forms and the pull request template, so write their
+structure yourself. Search open issues first; one issue is one problem.
+
+- Issue title: one short sentence that says the problem or the outcome, in English or Simplified Chinese. No type
+  prefix such as `[feat]`; the label carries the type.
+- Bug, `--label bug`: `## What happened`, `## What you expected`, `## Steps to reproduce`,
+  `## Version and environment`.
+- Feature or improvement, `--label enhancement`: `## Problem`, `## Proposed solution`,
+  `## Alternatives considered` (when there were any), `## Done when`.
+- Documentation, `--label documentation`: `## Where`, `## What is missing, unclear or wrong`, `## Suggested change`.
+- Labels: `accessibility` marks VoiceOver, keyboard and contrast work, together with `enhancement` or `bug`.
+- Pull request: the title is the Conventional Commits subject (it becomes the squash commit). The body has
+  `## Summary` (what changes and why), `## Related issue` (`Closes #<n>`, or `None.`), `## How tested` (the
+  commands run and their results, and what was not run) and `## Checklist`:
+  `- [ ] PR title follows Conventional Commits`, `- [ ] Tests pass`,
+  `- [ ] Documentation updated where behavior changed`, ticked only when true.
 
 ## Red lines
 
-Credentials never appear in PRs, issues, logs or chat. Never commit a Sparkle private key. Signing, release and
-anything sent to an external service need the maintainer's confirmation. No blind staging.
+- Credentials never go into pull requests, issues, logs or chat. Never commit a Sparkle private key.
+- Releases, signing and anything sent to an external service need the maintainer's confirmation.
+- No blind `git add -A` of unknown files; stage the files you checked by name.

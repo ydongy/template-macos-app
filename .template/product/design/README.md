@@ -16,5 +16,6 @@ A UI change starts from the mockup: edit or add `screens/<screen>.html`, get the
 maintainer, then write the UI code in `Template/UI/<Screen>/`. A screen file is named like its code directory and
 shows every state through `?state=`. The CSS custom properties carry the names and numbers of
 `TemplateCore/Sources/TemplateCore/Design/DesignTokens.swift`: a token changes in the Swift file, in
-`docs/design.md`, in `tokens.html` and in each screen's `:root` block together. Screenshots exported from a Mac go
-to `design/screenshots/<screen>/{light,dark}.png`.
+`docs/design.md`, in `tokens.html` and in each screen's `:root` block together. Screenshots of the running app
+are not tracked: capture them into `design/screenshots/` (ignored) and show light and dark in the pull request
+description.

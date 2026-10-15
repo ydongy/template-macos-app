@@ -14,3 +14,9 @@ All notable changes to this template are documented here. The format is based on
 - The closed-source skeleton moved to `.template/product/`, the open-source one to `.template/oss/`.
 - `ci.yml` selects the Xcode by major version (27) instead of a fixed point release.
 - The skeletons no longer depend on shared workflows or an external documents check.
+- Every generated `AGENTS.md` spells out the issue forms and the pull request body for agents that use `gh`, and
+  states the red lines in full; `CONTRIBUTING.md` states that issues and pull requests may be in English or
+  Simplified Chinese.
+- The proprietary `LICENSE` opens with the copyright line and carries no template comment; the product README
+  points security reports to private vulnerability reporting instead of a mailbox.
+- `design/screenshots/` is ignored: screenshots of the running app go into pull request descriptions.
